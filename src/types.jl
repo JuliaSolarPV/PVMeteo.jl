@@ -13,14 +13,14 @@ abstract type IntervalLabel end
 """
     LeftLabeled()
 
-The timestamp is the start of the interval: 10:00 covers 10:00–11:00.
+The timestamp is the start of the interval: 10:00 covers 10:00 to 11:00.
 """
 struct LeftLabeled <: IntervalLabel end
 
 """
     RightLabeled()
 
-The timestamp is the end of the interval: 10:00 covers 09:00–10:00.
+The timestamp is the end of the interval: 10:00 covers 09:00 to 10:00.
 
 This is the EPW and TMY3 convention.
 """
@@ -29,7 +29,7 @@ struct RightLabeled <: IntervalLabel end
 """
     CenterLabeled()
 
-The timestamp is the middle of the interval: 10:00 covers 09:30–10:30.
+The timestamp is the middle of the interval: 10:00 covers 09:30 to 10:30.
 """
 struct CenterLabeled <: IntervalLabel end
 
@@ -40,11 +40,11 @@ Everything needed to interpret a [`MeteoData`](@ref), and enough provenance to
 reproduce it.
 
 `interval` is a type parameter rather than an abstract `Period` field so the
-struct stays concrete. Timestamps in the accompanying data are always UTC;
+struct stays concrete. Timestamps in the accompanying data are always UTC.
 `utc_offset` records the offset of the source so local time can be recovered at
 the boundary.
 
-Anything a parser could not map to a canonical column lands in `extra` — no
+Anything a parser could not map to a canonical column lands in `extra`. No
 reader silently drops information.
 """
 struct MeteoMeta{L<:IntervalLabel,P<:Period}
@@ -104,7 +104,7 @@ end
 A meteorological time series and the metadata needed to interpret it.
 
 `time` is always UTC. `data` is a `NamedTuple` of equal-length `Vector{T}`
-rather than a `DataFrame`, which keeps the container generic over `T` — `Float32`,
+rather than a `DataFrame`, which keeps the container generic over `T`. `Float32`,
 `BigFloat`, dual numbers and uncertainty types all pass through unboxed. Use the
 Tables.jl interface for interop with tabular packages.
 

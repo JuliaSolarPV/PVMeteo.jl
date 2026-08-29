@@ -7,8 +7,8 @@ A hash of the raw bytes a `MeteoData` was parsed from.
 Together with `MeteoMeta.lineage` this is what makes "spec + data = reproducible
 result" true: the hash pins the source, the lineage records everything done to it
 since. `Base.hash` is not guaranteed stable across Julia versions, so this takes
-the leading eight bytes of a SHA-256 digest instead — the same file gives the same
-value next year and on someone else's machine.
+the leading eight bytes of a SHA-256 digest instead, so the same file gives the
+same value next year and on someone else's machine.
 """
 content_hash(bytes::AbstractVector{UInt8}) =
     first(reinterpret(UInt64, SHA.sha256(collect(bytes))))

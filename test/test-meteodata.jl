@@ -53,7 +53,7 @@ end
 end
 
 @testitem "MeteoData allows unsorted time" tags=[:unit, :fast] setup=[MetaFixture] begin
-    # Parsing must never reject data; timestamp regularity is a QC concern.
+    # Parsing must never reject data. Timestamp regularity is a QC concern.
     t = [DateTime(2026, 1, 1, 2), DateTime(2026, 1, 1, 1), DateTime(2026, 1, 1, 1)]
     md = PVMeteo.MeteoData(t, (; ghi = [1.0, 2.0, 3.0]), make_meta())
     @test md.time == t

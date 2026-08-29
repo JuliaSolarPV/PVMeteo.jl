@@ -32,8 +32,18 @@ end
 
 @testitem "read_tmy3 maps the canonical columns" tags=[:unit, :fast] setup=[TMY3Fixture] begin
     md = PVMeteo.read_tmy3(fixture("minimal_tmy3.csv"))
-    for name in (:ghi, :dni, :dhi, :temp_air, :relative_humidity, :pressure,
-                 :wind_direction, :wind_speed, :precipitable_water, :albedo)
+    for name in (
+        :ghi,
+        :dni,
+        :dhi,
+        :temp_air,
+        :relative_humidity,
+        :pressure,
+        :wind_direction,
+        :wind_speed,
+        :precipitable_water,
+        :albedo,
+    )
         @test PVMeteo.hascolumn(md, name)
     end
 end
@@ -85,7 +95,7 @@ end
 @testitem "the two stamp encodings differ" tags=[:unit, :fast] begin
     using Dates
     # EPW splits an instant into hour 1..24 plus a minute 1..60 counted inside
-    # that hour; TMY3 writes the instant itself. Both describe the same moment.
+    # that hour. TMY3 writes the instant itself. Both describe the same moment.
     @test PVMeteo.epw_local_stamp(2020, 6, 20, 1, 60) == DateTime(2020, 6, 20, 1)
     @test PVMeteo.tmy3_local_stamp(2020, 6, 20, 1, 0) == DateTime(2020, 6, 20, 1)
 

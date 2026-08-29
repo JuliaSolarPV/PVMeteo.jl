@@ -13,11 +13,11 @@ The canonical column names, in SI units throughout.
 | `:wind_direction`     | °     |
 | `:pressure`           | Pa    |
 | `:relative_humidity`  | %     |
-| `:albedo`             | –     |
+| `:albedo`             | none  |
 | `:precipitable_water` | cm    |
 
-Units are not carried in the type — `Unitful` composes badly with the dual and
-uncertainty numbers threaded through a model chain — so they are documented here
+Units are not carried in the type. `Unitful` composes badly with the dual and
+uncertainty numbers threaded through a model chain, so units are documented here
 and asserted in the test suite instead.
 """
 const CANONICAL = (

@@ -123,7 +123,7 @@ end
 end
 
 @testitem "read_epw does not repair a broken file" tags=[:unit, :fast] setup=[EPWFixture] begin
-    # Parsing reports what it found; it never rejects or silently fixes.
+    # Parsing reports what it found. It never rejects or silently fixes.
     md = PVMeteo.read_epw(fixture("dst_duplicate.epw"))
     @test length(md.time) == 73
     @test !allunique(md.time)

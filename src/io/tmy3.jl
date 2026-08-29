@@ -1,6 +1,6 @@
 # NREL TMY3.
 #
-# Two header lines — station metadata, then column names — followed by data. The
+# Two header lines, station metadata and then column names, followed by data. The
 # hour field runs 1..24 and labels the end of the interval, as in EPW, but the
 # irradiance is already power rather than accumulated energy.
 
@@ -9,10 +9,10 @@
 
 The local end-of-interval instant a TMY3 row describes.
 
-TMY3 writes that instant directly — `01:00` is the hour ending at 01:00, and the
+TMY3 writes that instant directly. `01:00` is the hour ending at 01:00, and the
 hour runs 1..24 so `24:00` rolls into midnight of the next day. This is *not*
 EPW's encoding, which splits the same instant into an hour 1..24 plus a minute
-1..60 counted inside it; sharing one rule between the two shifts every TMY3
+1..60 counted inside it. Sharing one rule between the two shifts every TMY3
 record back by an hour.
 """
 function tmy3_local_stamp(y::Int, mo::Int, d::Int, hour::Int, minute::Int)
@@ -44,10 +44,10 @@ Metadata comes from the file's first line. Timestamps are `MM/DD/YYYY` plus an
 `HH:MM` whose hour runs 1..24 and labels the end of the interval, so they are
 read with the same rule as EPW and converted to UTC using the declared offset.
 
-Every column without a canonical name — the `source` and `uncert (%)` columns in
-particular — is kept in `meta.extra` under its name as written in the file.
+Every column without a canonical name is kept in `meta.extra` under its name as
+written in the file. That includes the `source` and `uncert (%)` columns.
 
-Parsing never rejects; use [`validate`](@ref) to inspect what was read.
+Parsing never rejects. Use [`validate`](@ref) to inspect what was read.
 """
 function read_tmy3(path::AbstractString; T::Type = Float64, coerce_year = nothing)
     lines = readlines(path)
@@ -82,7 +82,7 @@ function read_tmy3(path::AbstractString; T::Type = Float64, coerce_year = nothin
 
     source_years = Vector{Int}(undef, n)
     local_time = Vector{DateTime}(undef, n)
-    for i in 1:n
+    for i = 1:n
         month_s, day_s, year_s = split(fields[i][date_at], '/')
         hour_s, minute_s = split(fields[i][time_at], ':')
         source_years[i] = parse(Int, year_s)
@@ -107,7 +107,7 @@ function read_tmy3(path::AbstractString; T::Type = Float64, coerce_year = nothin
         at = index[column_name]
         push!(mapped_columns, column_name)
         column = Vector{T}(undef, n)
-        for i in 1:n
+        for i = 1:n
             column[i] = T(convert(parse(Float64, fields[i][at])))
         end
         push!(names, name)
@@ -116,7 +116,7 @@ function read_tmy3(path::AbstractString; T::Type = Float64, coerce_year = nothin
     isempty(names) &&
         throw(ArgumentError("$path has none of the expected TMY3 data columns"))
 
-    extra = Dict{Symbol, Any}(:usaf => String(usaf))
+    extra = Dict{Symbol,Any}(:usaf => String(usaf))
     for (i, column_name) in enumerate(header)
         String(column_name) in mapped_columns && continue
         extra[Symbol(column_name)] = [String(f[i]) for f in fields]

@@ -61,7 +61,7 @@ const EPW_HEADER_KEYS = (
 
 The local end-of-interval instant a row describes.
 
-EPW hour `h` runs 1..24 and covers `(h-1):00` to `h:00`; the minute field runs
+EPW hour `h` runs 1..24 and covers `(h-1):00` to `h:00`. The minute field runs
 1..60 within that hour. Counting from the start of hour `h-1` handles the
 hour-24 rollover into the next day and sub-hourly records with one rule.
 """
@@ -77,14 +77,14 @@ end
 Read an EnergyPlus Weather file.
 
 Metadata comes from the file's own header. Timestamps are converted to UTC using
-the offset the header declares — EPW is written in local *standard* time, so a
+the offset the header declares. EPW is written in local *standard* time, so a
 file spanning a daylight-saving transition still yields uniform UTC.
 
 Nothing is discarded: the seven non-`LOCATION` header lines and every data field
 without a canonical name are kept in `meta.extra`.
 
 Parsing never rejects. A file with duplicate or missing records is returned as
-found; use [`validate`](@ref) to learn about it.
+found. Use [`validate`](@ref) to learn about it.
 
 `coerce_year` rewrites every year field before timestamps are built, for
 TMY-style files that stitch months from different years. The originals are kept

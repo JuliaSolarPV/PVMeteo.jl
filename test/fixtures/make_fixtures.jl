@@ -14,7 +14,7 @@ const HERE = @__DIR__
 
 # ---------------------------------------------------------------------------
 # Solar geometry. Used only to build physically consistent irradiance for the
-# closure fixtures — the package itself must never gain a solar position
+# closure fixtures. The package itself must never gain a solar position
 # dependency, so this lives in the test scaffolding.
 # ---------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ end
 """
 Encode a LOCAL end-of-interval timestamp as EPW `(date, hour, minute)`.
 
-EPW hour `h` runs 1..24 and covers local `(h-1):00` to `h:00`; the minute field
+EPW hour `h` runs 1..24 and covers local `(h-1):00` to `h:00`. The minute field
 runs 1..60 within that hour, so 60 means the end of it. Counting minutes from
 midnight makes both the hour-24 rollover and sub-hourly records fall out of one
 rule: `h = cld(M, 60)`, `m = M - 60(h - 1)`.
@@ -372,7 +372,7 @@ function make_all(dir = HERE)
 
     # Deliberately broken: the fall-back hour recorded twice, as happens when a
     # DST-aware local series is written out without resolving the ambiguity. Real
-    # EPW files are in local standard time and never contain this — it exists so
+    # EPW files are in local standard time and never contain this. It exists so
     # the :duplicate_ts check has something to fire on.
     autumn = local_stamps(Date(2020, 10, 24), 3, 1)
     dup_at = findfirst(==(DateTime(2020, 10, 25, 3)), autumn)
