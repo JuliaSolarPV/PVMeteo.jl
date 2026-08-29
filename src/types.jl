@@ -1,0 +1,100 @@
+"""
+    IntervalLabel
+
+Where a timestamp sits inside the interval it labels.
+
+Irradiance is integrated over an interval and the sun moves within it, so the
+convention is not cosmetic: reading a left-labelled file as right-labelled
+shifts every record by one interval. Encoding it in the type means a mismatched
+combination is a method error rather than a wrong number.
+"""
+abstract type IntervalLabel end
+
+"""
+    LeftLabeled()
+
+The timestamp is the start of the interval: 10:00 covers 10:00–11:00.
+"""
+struct LeftLabeled <: IntervalLabel end
+
+"""
+    RightLabeled()
+
+The timestamp is the end of the interval: 10:00 covers 09:00–10:00.
+
+This is the EPW and TMY3 convention.
+"""
+struct RightLabeled <: IntervalLabel end
+
+"""
+    CenterLabeled()
+
+The timestamp is the middle of the interval: 10:00 covers 09:30–10:30.
+"""
+struct CenterLabeled <: IntervalLabel end
+
+"""
+    MeteoMeta{L,P}
+
+Everything needed to interpret a [`MeteoData`](@ref), and enough provenance to
+reproduce it.
+
+`interval` is a type parameter rather than an abstract `Period` field so the
+struct stays concrete. Timestamps in the accompanying data are always UTC;
+`utc_offset` records the offset of the source so local time can be recovered at
+the boundary.
+
+Anything a parser could not map to a canonical column lands in `extra` — no
+reader silently drops information.
+"""
+struct MeteoMeta{L<:IntervalLabel, P<:Period}
+    latitude::Float64
+    longitude::Float64
+    altitude::Float64
+    utc_offset::Minute
+    label::L
+    interval::P
+    source::Symbol
+    origin::String
+    retrieved::DateTime
+    content_hash::UInt64
+    lineage::Vector{Symbol}
+    station::Union{Nothing, String}
+    extra::Dict{Symbol, Any}
+end
+
+function MeteoMeta(;
+    latitude,
+    longitude,
+    altitude,
+    utc_offset,
+    label,
+    interval,
+    source,
+    origin,
+    retrieved,
+    content_hash,
+    lineage = Symbol[],
+    station = nothing,
+    extra = Dict{Symbol, Any}(),
+)
+    -90 <= latitude <= 90 ||
+        throw(ArgumentError("latitude $latitude is outside [-90, 90]"))
+    -180 <= longitude <= 360 ||
+        throw(ArgumentError("longitude $longitude is outside [-180, 360]"))
+    return MeteoMeta(
+        Float64(latitude),
+        Float64(longitude),
+        Float64(altitude),
+        Minute(utc_offset),
+        label,
+        interval,
+        Symbol(source),
+        String(origin),
+        retrieved,
+        UInt64(content_hash),
+        lineage,
+        station,
+        extra,
+    )
+end
