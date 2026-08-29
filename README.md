@@ -15,9 +15,11 @@ simulating of solar photovoltaic systems.
 
 ## Installation
 
+Not registered yet, so install from GitHub.
+
 ```julia
 julia> # press ]
-pkg> add PVMeteo
+pkg> add https://github.com/JuliaSolarPV/PVMeteo.jl
 ```
 
 ## Reading a file
