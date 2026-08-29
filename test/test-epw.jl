@@ -33,8 +33,18 @@ end
 
 @testitem "read_epw maps the canonical columns" tags=[:unit, :fast] setup=[EPWFixture] begin
     md = PVMeteo.read_epw(fixture("minimal.epw"))
-    for name in (:ghi, :dni, :dhi, :temp_air, :relative_humidity, :pressure,
-                 :wind_direction, :wind_speed, :precipitable_water, :albedo)
+    for name in (
+        :ghi,
+        :dni,
+        :dhi,
+        :temp_air,
+        :relative_humidity,
+        :pressure,
+        :wind_direction,
+        :wind_speed,
+        :precipitable_water,
+        :albedo,
+    )
         @test PVMeteo.hascolumn(md, name)
     end
 end
@@ -63,8 +73,15 @@ end
 @testitem "read_epw keeps what it cannot map" tags=[:unit, :fast] setup=[EPWFixture] begin
     md = PVMeteo.read_epw(fixture("minimal.epw"))
     e = md.meta.extra
-    for k in (:design_conditions, :typical_extreme_periods, :ground_temperatures,
-              :holidays_dst, :comments_1, :comments_2, :data_periods)
+    for k in (
+        :design_conditions,
+        :typical_extreme_periods,
+        :ground_temperatures,
+        :holidays_dst,
+        :comments_1,
+        :comments_2,
+        :data_periods,
+    )
         @test haskey(e, k)
     end
     @test occursin("Synthetic fixture", e[:comments_1])
@@ -117,7 +134,7 @@ end
 
 @testitem "read_epw can coerce the year" tags=[:unit, :fast] setup=[EPWFixture] begin
     md = PVMeteo.read_epw(fixture("minimal.epw"); coerce_year = 2001)
-    @test all(t -> year(t) == 2001, md.time[2:(end - 1)])
+    @test all(t -> year(t) == 2001, md.time[2:(end-1)])
     @test md.meta.extra[:coerced_year] == 2001
     @test md.meta.extra[:source_years] == fill(2020, 72)
 end

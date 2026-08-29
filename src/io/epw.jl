@@ -94,15 +94,14 @@ function read_epw(path::AbstractString; T::Type = Float64, coerce_year = nothing
     lines = readlines(path)
     length(lines) > 8 || throw(ArgumentError("$path has no EPW data rows"))
 
-    extra = Dict{Symbol, Any}()
+    extra = Dict{Symbol,Any}()
     for (i, key) in enumerate(EPW_HEADER_KEYS)
         key === :location && continue
         extra[key] = lines[i]
     end
 
     location = split(lines[1], ',')
-    length(location) >= 10 ||
-        throw(ArgumentError("$path has a malformed LOCATION line"))
+    length(location) >= 10 || throw(ArgumentError("$path has a malformed LOCATION line"))
     station = strip(location[2])
     latitude = parse(Float64, location[7])
     longitude = parse(Float64, location[8])
@@ -110,12 +109,10 @@ function read_epw(path::AbstractString; T::Type = Float64, coerce_year = nothing
     altitude = parse(Float64, location[10])
 
     periods = split(lines[8], ',')
-    length(periods) >= 3 ||
-        throw(ArgumentError("$path has a malformed DATA PERIODS line"))
+    length(periods) >= 3 || throw(ArgumentError("$path has a malformed DATA PERIODS line"))
     records_per_hour = parse(Int, strip(periods[3]))
-    records_per_hour >= 1 || throw(
-        ArgumentError("$path declares $records_per_hour records per hour"),
-    )
+    records_per_hour >= 1 ||
+        throw(ArgumentError("$path declares $records_per_hour records per hour"))
     interval = canonical_interval(Millisecond(3_600_000 ÷ records_per_hour))
 
     rows = @view lines[9:end]
@@ -123,16 +120,14 @@ function read_epw(path::AbstractString; T::Type = Float64, coerce_year = nothing
     fields = [split(row, ',') for row in rows]
     for (i, f) in enumerate(fields)
         length(f) >= 35 || throw(
-            ArgumentError(
-                "$path row $i has $(length(f)) fields, expected at least 35",
-            ),
+            ArgumentError("$path row $i has $(length(f)) fields, expected at least 35"),
         )
     end
 
     source_years = [parse(Int, f[1]) for f in fields]
     years = coerce_year === nothing ? source_years : fill(Int(coerce_year), n)
     local_time = Vector{DateTime}(undef, n)
-    for i in 1:n
+    for i = 1:n
         f = fields[i]
         local_time[i] = epw_local_stamp(
             years[i],
@@ -155,7 +150,7 @@ function read_epw(path::AbstractString; T::Type = Float64, coerce_year = nothing
     for (idx, name, convert) in EPW_MAPPED
         column = Vector{T}(undef, n)
         scale = name in EPW_IRRADIANCE ? irradiance_scale : one(T)
-        for i in 1:n
+        for i = 1:n
             column[i] = T(convert(parse(Float64, fields[i][idx]))) * scale
         end
         push!(names, name)
