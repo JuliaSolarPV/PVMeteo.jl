@@ -38,7 +38,7 @@ const CANONICAL = (
 
 The column names carried by `md`, in storage order.
 """
-columns(::MeteoData{T, N}) where {T, N} = N
+columns(::MeteoData{T,N}) where {T,N} = N
 
 """
     hascolumn(md::MeteoData, name::Symbol) -> Bool

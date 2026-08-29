@@ -39,7 +39,7 @@ end
     @test PVMeteo.columns(md) === (:ghi, :temp_air)
 end
 
-@testitem "hascolumn answers for present and absent" tags=[:unit, :fast] setup=[ColumnFixture] begin
+@testitem "hascolumn answers both ways" tags=[:unit, :fast] setup=[ColumnFixture] begin
     md = tiny((; ghi = [1.0, 2.0]))
     @test PVMeteo.hascolumn(md, :ghi)
     @test !PVMeteo.hascolumn(md, :dni)
@@ -53,7 +53,7 @@ end
     @test md.data.ghi[1] == 99.0
 end
 
-@testitem "a missing accessor names what is there" tags=[:unit, :fast] setup=[ColumnFixture] begin
+@testitem "a missing accessor names others" tags=[:unit, :fast] setup=[ColumnFixture] begin
     md = tiny((; ghi = [1.0, 2.0], temp_air = [3.0, 4.0]))
     err = try
         PVMeteo.dni(md)
@@ -67,7 +67,7 @@ end
     @test occursin("temp_air", err.msg)
 end
 
-@testitem "every canonical name has an accessor" tags=[:unit, :fast] setup=[ColumnFixture] begin
+@testitem "every canonical name accesses" tags=[:unit, :fast] setup=[ColumnFixture] begin
     for name in PVMeteo.CANONICAL
         md = tiny(NamedTuple{(name,)}(([1.0, 2.0],)))
         @test getfield(PVMeteo, name)(md) == [1.0, 2.0]
