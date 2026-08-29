@@ -14,14 +14,18 @@ struct QCFlag
     indices::Vector{Int}
     severity::Symbol
     detail::String
-    column::Union{Nothing, Symbol}
+    column::Union{Nothing,Symbol}
 
     function QCFlag(check, indices, severity, detail, column = nothing)
-        severity in SEVERITIES || throw(
-            ArgumentError("severity :$severity must be one of $(SEVERITIES)"),
+        severity in SEVERITIES ||
+            throw(ArgumentError("severity :$severity must be one of $(SEVERITIES)"))
+        return new(
+            Symbol(check),
+            collect(Int, indices),
+            Symbol(severity),
+            String(detail),
+            column,
         )
-        return new(Symbol(check), collect(Int, indices), Symbol(severity),
-                   String(detail), column)
     end
 end
 
@@ -75,8 +79,12 @@ recorded at it.
 
 `:interpolate` and `:drop` need the resampling machinery and are not available yet.
 """
-function apply(md::MeteoData{T}, report::QCReport;
-               policy::Symbol = :mask, severity::Symbol = :error) where {T}
+function apply(
+    md::MeteoData{T},
+    report::QCReport;
+    policy::Symbol = :mask,
+    severity::Symbol = :error,
+) where {T}
     policy in APPLY_POLICIES ||
         throw(ArgumentError("unknown policy :$policy, expected one of $(APPLY_POLICIES)"))
     policy === :mask || throw(
@@ -85,9 +93,8 @@ function apply(md::MeteoData{T}, report::QCReport;
             "Use :mask.",
         ),
     )
-    severity in SEVERITIES || throw(
-        ArgumentError("severity :$severity must be one of $(SEVERITIES)"),
-    )
+    severity in SEVERITIES ||
+        throw(ArgumentError("severity :$severity must be one of $(SEVERITIES)"))
     T <: AbstractFloat || throw(
         ArgumentError(
             "policy :mask writes NaN, which $T cannot hold. " *

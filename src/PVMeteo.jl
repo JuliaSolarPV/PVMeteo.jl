@@ -11,6 +11,7 @@ include("tables.jl")
 include("io/epw.jl")
 include("io/tmy3.jl")
 include("qc/report.jl")
+include("qc/timestamps.jl")
 
 export IntervalLabel, LeftLabeled, RightLabeled, CenterLabeled
 export MeteoMeta, MeteoData

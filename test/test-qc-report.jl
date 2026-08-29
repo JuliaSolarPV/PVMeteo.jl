@@ -19,8 +19,7 @@
         return PVMeteo.MeteoData(t, nt, meta)
     end
 
-    flag(check, idx, sev, col = nothing) =
-        PVMeteo.QCFlag(check, idx, sev, "detail", col)
+    flag(check, idx, sev, col = nothing) = PVMeteo.QCFlag(check, idx, sev, "detail", col)
 end
 
 @testitem "QCFlag checks its severity" tags=[:unit, :fast] setup=[QCFixture] begin
@@ -87,7 +86,11 @@ end
 @testitem "mask honours the severity floor" tags=[:unit, :fast] setup=[QCFixture] begin
     md = sample()
     r = PVMeteo.QCReport(
-        [flag(:a, [1], :info, :ghi), flag(:b, [2], :warn, :ghi), flag(:c, [3], :error, :ghi)],
+        [
+            flag(:a, [1], :info, :ghi),
+            flag(:b, [2], :warn, :ghi),
+            flag(:c, [3], :error, :ghi),
+        ],
         5,
     )
     strict = PVMeteo.apply(md, r)
@@ -142,7 +145,8 @@ end
 
 @testitem "the report counts records readably" tags=[:unit, :fast] setup=[QCFixture] begin
     one = sprint(show, MIME("text/plain"), PVMeteo.QCReport([flag(:gap, [3], :warn)], 5))
-    many = sprint(show, MIME("text/plain"), PVMeteo.QCReport([flag(:gap, [3, 4], :warn)], 5))
+    many =
+        sprint(show, MIME("text/plain"), PVMeteo.QCReport([flag(:gap, [3, 4], :warn)], 5))
     @test occursin("1 record.", one)
     @test occursin("2 records.", many)
 end
