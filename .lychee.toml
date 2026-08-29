@@ -1,5 +1,7 @@
 exclude = [
   "^https://github.com/.*/releases/tag/v.*$",
+  # Valid only once the first version is tagged.
+  "^https://github.com/.*/compare/v.*\\.\\.\\.HEAD$",
   "^https://doi.org/FIXME$",
   "^https://blog.esciencecenter.nl", # due to a certificate error (cf. #556)
   "zenodo.org/badge/DOI/FIXME$"
