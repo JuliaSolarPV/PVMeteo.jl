@@ -9,6 +9,7 @@
         "gap.epw",
         "closure_good.epw",
         "closure_bad.epw",
+        "closure_cosz.csv",
         "minimal_tmy3.csv",
     ]
     for name in expected

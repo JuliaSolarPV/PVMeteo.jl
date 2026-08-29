@@ -12,9 +12,6 @@ const EPW_MAPPED = (
     (33, :albedo, identity),                     # dimensionless
 )
 
-"""Irradiance fields are accumulated energy and need the interval scaling."""
-const EPW_IRRADIANCE = (:ghi, :dni, :dhi)
-
 """Names for the data fields we do not map, so they can be kept in `extra`."""
 const EPW_UNMAPPED = Dict(
     6 => :data_source_and_uncertainty_flags,
@@ -140,7 +137,7 @@ function read_epw(path::AbstractString; T::Type = Float64, coerce_year = nothing
     vectors = Vector{T}[]
     for (idx, name, convert) in EPW_MAPPED
         column = Vector{T}(undef, n)
-        scale = name in EPW_IRRADIANCE ? irradiance_scale : one(T)
+        scale = name in IRRADIANCE ? irradiance_scale : one(T)
         for i = 1:n
             column[i] = T(convert(parse(Float64, fields[i][idx]))) * scale
         end

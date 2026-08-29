@@ -34,6 +34,12 @@ const CANONICAL = (
 )
 
 """
+The canonical columns that measure irradiance. These share bounds, share a unit,
+and are zero every night, so several checks treat them together.
+"""
+const IRRADIANCE = (:ghi, :dni, :dhi)
+
+"""
     columns(md::MeteoData) -> Tuple{Vararg{Symbol}}
 
 The column names carried by `md`, in storage order.

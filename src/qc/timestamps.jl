@@ -21,19 +21,12 @@ function check_timestamps(md::MeteoData)
     duplicates = findall(==(Millisecond(0)), steps) .+ 1
     isempty(duplicates) || push!(
         flags,
-        QCFlag(
-            :duplicate_ts,
-            duplicates,
-            :error,
-            "timestamp repeats the previous record",
-        ),
+        QCFlag(:duplicate_ts, duplicates, :error, "timestamp repeats the previous record"),
     )
 
     backwards = findall(<(Millisecond(0)), steps) .+ 1
-    isempty(backwards) || push!(
-        flags,
-        QCFlag(:non_monotonic, backwards, :error, "timestamp moves backwards"),
-    )
+    isempty(backwards) ||
+        push!(flags, QCFlag(:non_monotonic, backwards, :error, "timestamp moves backwards"))
 
     modal = modal_step(steps)
     if modal !== nothing && modal != interval
@@ -61,12 +54,7 @@ function check_timestamps(md::MeteoData)
         end
         isempty(holes) || push!(
             flags,
-            QCFlag(
-                :gap,
-                holes,
-                :warn,
-                gap_detail(sum(missing_counts), length(holes)),
-            ),
+            QCFlag(:gap, holes, :warn, gap_detail(sum(missing_counts), length(holes))),
         )
     end
 
@@ -81,7 +69,7 @@ end
 
 """The most common positive spacing, or `nothing` when there is none."""
 function modal_step(steps)
-    counts = Dict{Millisecond, Int}()
+    counts = Dict{Millisecond,Int}()
     for s in steps
         s > Millisecond(0) || continue
         ms = Millisecond(s)

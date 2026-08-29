@@ -314,6 +314,25 @@ end
 # The fixtures
 # ---------------------------------------------------------------------------
 
+"""
+Write the cos(zenith) used to build a fixture, one value per record.
+
+The closure and limit checks take cos(zenith) from the caller, so the tests need
+the same values the data was constructed from. Recomputing them in the test would
+duplicate the solar geometry and could drift from it.
+"""
+function write_cosz(dir, name, stamps, tz_hours)
+    path = joinpath(dir, name)
+    open(path, "w") do io
+        println(io, "cosz")
+        for s in stamps
+            _, _, _, mu = clear_sky(s, tz_hours)
+            @printf(io, "%.10f\n", mu)
+        end
+    end
+    return path
+end
+
 function make_all(dir = HERE)
     written = String[]
 
@@ -386,6 +405,11 @@ function make_all(dir = HERE)
             1.0,
             1,
         ),
+    )
+
+    push!(
+        written,
+        write_cosz(dir, "closure_cosz.csv", local_stamps(Date(2020, 6, 20), 2, 1), 1.0),
     )
 
     push!(

@@ -18,7 +18,7 @@
         return PVMeteo.MeteoData(times, (; ghi = zeros(length(times))), meta)
     end
 
-    hourly(n) = collect(DateTime(2026, 1, 1):Hour(1):(DateTime(2026, 1, 1) + Hour(n - 1)))
+    hourly(n) = collect(DateTime(2026, 1, 1):Hour(1):(DateTime(2026, 1, 1)+Hour(n-1)))
     checks(flags) = sort(unique(f.check for f in flags))
     only_check(flags, name) = only(filter(f -> f.check === name, flags))
 end
@@ -37,7 +37,7 @@ end
     @test dup.severity == :error
     @test dup.column === nothing
     @test length(dup.indices) == 1
-    @test md.time[dup.indices[1]] == md.time[dup.indices[1] - 1]
+    @test md.time[dup.indices[1]] == md.time[dup.indices[1]-1]
 end
 
 @testitem "gaps are flagged with their span" tags=[:unit, :fast] setup=[TSFixture] begin
@@ -83,7 +83,10 @@ end
 @testitem "gap details read naturally" tags=[:unit, :fast] setup=[TSFixture] begin
     t = hourly(10)
     deleteat!(t, 4)
-    @test occursin("1 record missing", only_check(PVMeteo.check_timestamps(series(t)), :gap).detail)
+    @test occursin(
+        "1 record missing",
+        only_check(PVMeteo.check_timestamps(series(t)), :gap).detail,
+    )
 
     u = hourly(12)
     deleteat!(u, [4, 8, 9])
