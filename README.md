@@ -67,8 +67,8 @@ ERROR: ArgumentError: this MeteoData has no :dni column. Available columns: (:gh
 
 ## Interval labelling
 
-The labelling convention is part of the type, so mixing conventions raises a
-`MethodError`. EPW and TMY3 are `RightLabeled`.
+The labelling convention is part of the type. A function written for one convention
+raises a `MethodError` when given another. EPW and TMY3 are `RightLabeled`.
 
 ```julia
 julia> md.meta.label, typeof(md).parameters[3]
@@ -77,7 +77,7 @@ julia> md.meta.label, typeof(md).parameters[3]
 
 ## Element type
 
-The element type is generic. `Float32`, `BigFloat`, dual numbers and uncertainty
+The element type is generic. `Float32`, `BigFloat`, and even dual numbers or uncertainty
 types are all supported.
 
 ```julia
@@ -85,25 +85,15 @@ julia> read_epw("NLD_De-Bilt.epw"; T = Float32) isa MeteoData{Float32}
 true
 ```
 
-## Interop
+## Tables.jl interface
 
-`MeteoData` implements the Tables.jl interface, with `time` as the first column.
+`MeteoData` implements the Tables.jl interface, with `time` always as the first column.
 
 ```julia
 julia> using Tables
 
 julia> Tables.schema(md).names
 (:time, :temp_air, :relative_humidity, :pressure, :ghi, :dni, :dhi, :wind_direction, :wind_speed, :precipitable_water, :albedo)
-```
-
-## Provenance
-
-Header lines and unmapped fields are kept in `meta.extra`. The source bytes are
-hashed into `meta.content_hash`.
-
-```julia
-julia> length(md.meta.extra), md.meta.content_hash
-(27, 0x586f483a433e9ce8)
 ```
 
 ## How to Cite
