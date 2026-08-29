@@ -49,3 +49,14 @@ end
     @test length(unique(typeof.(labels))) == 3
     @test all(l -> isbitstype(typeof(l)), labels)
 end
+
+@testitem "canonical_interval picks the coarsest unit" tags=[:unit, :fast] begin
+    using Dates
+    @test PVMeteo.canonical_interval(Millisecond(3_600_000)) === Hour(1)
+    @test PVMeteo.canonical_interval(Millisecond(900_000)) === Minute(15)
+    @test PVMeteo.canonical_interval(Millisecond(30_000)) === Second(30)
+    @test PVMeteo.canonical_interval(Millisecond(1_500)) === Millisecond(1500)
+    @test PVMeteo.canonical_interval(Hour(2)) === Hour(2)
+    @test PVMeteo.canonical_interval(Minute(90)) === Minute(90)
+    @test_throws ArgumentError PVMeteo.canonical_interval(Second(0))
+end

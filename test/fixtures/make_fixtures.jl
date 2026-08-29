@@ -23,13 +23,12 @@ function cos_zenith(lat_deg, lon_deg, t::DateTime)
     doy = Dates.dayofyear(t)
     hour = Dates.hour(t) + Dates.minute(t) / 60 + Dates.second(t) / 3600
     γ = 2π / 365 * (doy - 1 + (hour - 12) / 24)
-    eqtime = 229.18 * (
-        0.000075 + 0.001868cos(γ) - 0.032077sin(γ) -
-        0.014615cos(2γ) - 0.040849sin(2γ)
-    )
+    eqtime =
+        229.18 *
+        (0.000075 + 0.001868cos(γ) - 0.032077sin(γ) - 0.014615cos(2γ) - 0.040849sin(2γ))
     decl = (
-        0.006918 - 0.399912cos(γ) + 0.070257sin(γ) - 0.006758cos(2γ) +
-        0.000907sin(2γ) - 0.002697cos(3γ) + 0.00148sin(3γ)
+        0.006918 - 0.399912cos(γ) + 0.070257sin(γ) - 0.006758cos(2γ) + 0.000907sin(2γ) -
+        0.002697cos(3γ) + 0.00148sin(3γ)
     )
     time_offset = eqtime + 4 * lon_deg
     tst = hour * 60 + time_offset
@@ -50,7 +49,11 @@ function epw_header(; tz_hours, records_per_hour, start_date, end_date, station 
     return [
         @sprintf(
             "LOCATION,%s,-,NLD,TMYx,062600,%.2f,%.2f,%.1f,%.1f",
-            station, EPW_LAT, EPW_LON, tz_hours, EPW_ALT
+            station,
+            EPW_LAT,
+            EPW_LON,
+            tz_hours,
+            EPW_ALT
         ),
         "DESIGN CONDITIONS,0",
         "TYPICAL/EXTREME PERIODS,0",
@@ -61,7 +64,10 @@ function epw_header(; tz_hours, records_per_hour, start_date, end_date, station 
         @sprintf(
             "DATA PERIODS,1,%d,Data,Sunday,%d/%d,%d/%d",
             records_per_hour,
-            month(start_date), day(start_date), month(end_date), day(end_date)
+            month(start_date),
+            day(start_date),
+            month(end_date),
+            day(end_date)
         ),
     ]
 end
@@ -90,34 +96,44 @@ function epw_datetime_fields(stamp::DateTime)
 end
 
 """One EPW data row from a LOCAL end-of-interval timestamp."""
-function epw_row(stamp::DateTime; ghi, dni, dhi, tdry, rh, pres,
-                 wdir, wspd, pwat, alb)
+function epw_row(stamp::DateTime; ghi, dni, dhi, tdry, rh, pres, wdir, wspd, pwat, alb)
     d, h, minute_field = epw_datetime_fields(stamp)
     fields = [
-        string(year(d)), string(month(d)), string(day(d)), string(h),
+        string(year(d)),
+        string(month(d)),
+        string(day(d)),
+        string(h),
         string(minute_field),
         "?9?9?9?9E0?9?9?9?9?9?9?9?9?9?9?9?9?9?9?9*9*9?9?9?9",
         @sprintf("%.1f", tdry),      # 7  dry bulb °C
         @sprintf("%.1f", tdry - 4),  # 8  dew point °C
         @sprintf("%.0f", rh),        # 9  relative humidity %
         @sprintf("%.0f", pres),      # 10 station pressure Pa
-        "0", "0",                    # 11-12 extraterrestrial
+        "0",
+        "0",                    # 11-12 extraterrestrial
         "350",                       # 13 horizontal IR
         @sprintf("%.0f", ghi),       # 14 global horizontal Wh/m2
         @sprintf("%.0f", dni),       # 15 direct normal Wh/m2
         @sprintf("%.0f", dhi),       # 16 diffuse horizontal Wh/m2
-        "0", "0", "0", "0",          # 17-20 illuminance, luminance
+        "0",
+        "0",
+        "0",
+        "0",          # 17-20 illuminance, luminance
         @sprintf("%.0f", wdir),      # 21 wind direction deg
         @sprintf("%.1f", wspd),      # 22 wind speed m/s
-        "5", "5",                    # 23-24 sky cover
-        "20.0", "77777",             # 25-26 visibility, ceiling
-        "9", "999999999",            # 27-28 present weather
+        "5",
+        "5",                    # 23-24 sky cover
+        "20.0",
+        "77777",             # 25-26 visibility, ceiling
+        "9",
+        "999999999",            # 27-28 present weather
         @sprintf("%.0f", pwat),      # 29 precipitable water mm
         "0.080",                     # 30 aerosol optical depth
         "0",                         # 31 snow depth
         "88",                        # 32 days since snowfall
         @sprintf("%.3f", alb),       # 33 albedo
-        "0.0", "0.0",                # 34-35 liquid precipitation
+        "0.0",
+        "0.0",                # 34-35 liquid precipitation
     ]
     return join(fields, ",")
 end
@@ -168,9 +184,16 @@ function write_epw(dir, name, stamps, tz_hours, records_per_hour; corrupt = noth
             rows,
             epw_row(
                 s;
-                ghi = ghi * scale, dni = dni * scale, dhi = dhi * scale,
-                tdry = 12 + 9μ, rh = 70 - 20μ, pres = 101_325,
-                wdir = 230, wspd = 3.4 + μ, pwat = 15, alb = 0.2,
+                ghi = ghi * scale,
+                dni = dni * scale,
+                dhi = dhi * scale,
+                tdry = 12 + 9μ,
+                rh = 70 - 20μ,
+                pres = 101_325,
+                wdir = 230,
+                wspd = 3.4 + μ,
+                pwat = 15,
+                alb = 0.2,
             ),
         )
     end
@@ -191,25 +214,55 @@ end
 # ---------------------------------------------------------------------------
 
 const TMY3_COLUMNS = [
-    "Date (MM/DD/YYYY)", "Time (HH:MM)", "ETR (W/m^2)", "ETRN (W/m^2)",
-    "GHI (W/m^2)", "GHI source", "GHI uncert (%)",
-    "DNI (W/m^2)", "DNI source", "DNI uncert (%)",
-    "DHI (W/m^2)", "DHI source", "DHI uncert (%)",
-    "Pressure (mbar)", "Pressure source", "Pressure uncert (%)",
-    "Dry-bulb (C)", "Dry-bulb source", "Dry-bulb uncert (%)",
-    "RHum (%)", "RHum source", "RHum uncert (%)",
-    "Wdir (degrees)", "Wdir source", "Wdir uncert (%)",
-    "Wspd (m/s)", "Wspd source", "Wspd uncert (%)",
-    "Pwat (cm)", "Pwat source", "Pwat uncert (%)",
-    "Alb (unitless)", "Alb source", "Alb uncert (%)",
+    "Date (MM/DD/YYYY)",
+    "Time (HH:MM)",
+    "ETR (W/m^2)",
+    "ETRN (W/m^2)",
+    "GHI (W/m^2)",
+    "GHI source",
+    "GHI uncert (%)",
+    "DNI (W/m^2)",
+    "DNI source",
+    "DNI uncert (%)",
+    "DHI (W/m^2)",
+    "DHI source",
+    "DHI uncert (%)",
+    "Pressure (mbar)",
+    "Pressure source",
+    "Pressure uncert (%)",
+    "Dry-bulb (C)",
+    "Dry-bulb source",
+    "Dry-bulb uncert (%)",
+    "RHum (%)",
+    "RHum source",
+    "RHum uncert (%)",
+    "Wdir (degrees)",
+    "Wdir source",
+    "Wdir uncert (%)",
+    "Wspd (m/s)",
+    "Wspd source",
+    "Wspd uncert (%)",
+    "Pwat (cm)",
+    "Pwat source",
+    "Pwat uncert (%)",
+    "Alb (unitless)",
+    "Alb source",
+    "Alb uncert (%)",
 ]
 
 function write_tmy3(dir, name, stamps, tz_hours)
     path = joinpath(dir, name)
     open(path, "w") do io
         @printf(
-            io, "%s,%s,%s,%.1f,%.3f,%.3f,%.1f\n",
-            "062600", "De Bilt", "NLD", tz_hours, EPW_LAT, EPW_LON, EPW_ALT
+            io,
+            "%s,%s,%s,%.1f,%.3f,%.3f,%.1f\n",
+            "062600",
+            "De Bilt",
+            "NLD",
+            tz_hours,
+            EPW_LAT,
+            EPW_LON,
+            EPW_ALT
         )
         println(io, join(TMY3_COLUMNS, ","))
         for s in stamps
@@ -218,17 +271,38 @@ function write_tmy3(dir, name, stamps, tz_hours)
             fields = [
                 @sprintf("%02d/%02d/%04d", month(d), day(d), year(d)),
                 @sprintf("%02d:00", h),
-                "0", "0",
-                @sprintf("%.0f", ghi), "1", "8",
-                @sprintf("%.0f", dni), "1", "9",
-                @sprintf("%.0f", dhi), "1", "11",
-                @sprintf("%.0f", 1013.25), "1", "1",   # mbar, not Pa
-                @sprintf("%.1f", 12 + 9μ), "1", "7",
-                @sprintf("%.0f", 70 - 20μ), "1", "8",
-                "230", "1", "6",
-                @sprintf("%.1f", 3.4 + μ), "1", "5",
-                @sprintf("%.1f", 1.5), "1", "9",       # cm, not mm
-                "0.200", "1", "12",
+                "0",
+                "0",
+                @sprintf("%.0f", ghi),
+                "1",
+                "8",
+                @sprintf("%.0f", dni),
+                "1",
+                "9",
+                @sprintf("%.0f", dhi),
+                "1",
+                "11",
+                @sprintf("%.0f", 1013.25),
+                "1",
+                "1",   # mbar, not Pa
+                @sprintf("%.1f", 12 + 9μ),
+                "1",
+                "7",
+                @sprintf("%.0f", 70 - 20μ),
+                "1",
+                "8",
+                "230",
+                "1",
+                "6",
+                @sprintf("%.1f", 3.4 + μ),
+                "1",
+                "5",
+                @sprintf("%.1f", 1.5),
+                "1",
+                "9",       # cm, not mm
+                "0.200",
+                "1",
+                "12",
             ]
             println(io, join(fields, ","))
         end
@@ -244,7 +318,10 @@ function make_all(dir = HERE)
     written = String[]
 
     # 3 clean hourly days, UTC+1.
-    push!(written, write_epw(dir, "minimal.epw", local_stamps(Date(2020, 6, 20), 3, 1), 1.0, 1))
+    push!(
+        written,
+        write_epw(dir, "minimal.epw", local_stamps(Date(2020, 6, 20), 3, 1), 1.0, 1),
+    )
 
     # 15-minute records. Catches the Wh/m2 -> W/m2 scaling.
     push!(

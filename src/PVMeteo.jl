@@ -8,5 +8,6 @@ include("types.jl")
 include("provenance.jl")
 include("columns.jl")
 include("tables.jl")
+include("io/epw.jl")
 
 end

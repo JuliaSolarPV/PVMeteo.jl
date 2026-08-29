@@ -150,3 +150,22 @@ function Base.show(io::IO, ::MIME"text/plain", md::MeteoData{T,N}) where {T,N}
     isempty(md.meta.lineage) || println(io, "  lineage:  ", join(md.meta.lineage, " -> "))
     return nothing
 end
+
+"""
+    canonical_interval(p::Period) -> Period
+
+The same span expressed in the coarsest unit that divides it exactly.
+
+Intervals are often derived by division (an hour split into `n` records), which
+leaves a `Millisecond` even when the span is a whole hour. That value is correct
+but reads badly and makes `MeteoMeta`'s type parameter depend on how the number
+was reached rather than on what it is.
+"""
+function canonical_interval(p::Period)
+    ms = Dates.toms(p)
+    ms > 0 || throw(ArgumentError("interval must be positive, got $p"))
+    ms % 3_600_000 == 0 && return Hour(ms ÷ 3_600_000)
+    ms % 60_000 == 0 && return Minute(ms ÷ 60_000)
+    ms % 1_000 == 0 && return Second(ms ÷ 1_000)
+    return Millisecond(ms)
+end
