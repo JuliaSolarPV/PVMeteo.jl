@@ -67,8 +67,16 @@ ERROR: ArgumentError: this MeteoData has no :dni column. Available columns: (:gh
 
 ## Interval labelling
 
-The labelling convention is part of the type. A function written for one convention
-raises a `MethodError` when given another. EPW and TMY3 are `RightLabeled`.
+The label says where a timestamp sits for a given interval:
+
+| Label | Timestamp | 10:00 hourly covers |
+|:---|:---|:---|
+| `LeftLabeled` | start of the interval | 10:00 to 11:00 |
+| `RightLabeled` | end of the interval | 09:00 to 10:00 |
+| `CenterLabeled` | middle of the interval | 09:30 to 10:30 |
+
+The convention is part of the type. A function written for one convention raises a
+`MethodError` when given another. EPW and TMY3 are `RightLabeled`.
 
 ```julia
 julia> md.meta.label, typeof(md).parameters[3]
