@@ -45,8 +45,8 @@ columns(::MeteoData{T,N}) where {T,N} = N
 
 Whether `md` carries a column called `name`.
 
-This is the hook for trait validation upstream: a model stage that needs beam
-components can check for them at construction rather than failing at hour 4317.
+This is the hook for trait validation upstream. A model stage that needs beam
+components can check for them before it runs.
 """
 hascolumn(md::MeteoData, name::Symbol) = name in columns(md)
 

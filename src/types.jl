@@ -3,10 +3,9 @@
 
 Where a timestamp sits inside the interval it labels.
 
-Irradiance is integrated over an interval and the sun moves within it, so the
-convention is not cosmetic: reading a left-labelled file as right-labelled
-shifts every record by one interval. Encoding it in the type means a mismatched
-combination is a method error rather than a wrong number.
+Irradiance is integrated over an interval and the sun moves within it, so reading
+a left-labelled file as right-labelled shifts every record by one interval.
+Encoding the convention in the type makes a mismatch a method error.
 """
 abstract type IntervalLabel end
 
@@ -39,8 +38,7 @@ struct CenterLabeled <: IntervalLabel end
 Everything needed to interpret a [`MeteoData`](@ref), and enough provenance to
 reproduce it.
 
-`interval` is a type parameter rather than an abstract `Period` field so the
-struct stays concrete. Timestamps in the accompanying data are always UTC.
+`interval` is a type parameter so the struct stays concrete. Timestamps in the accompanying data are always UTC.
 `utc_offset` records the offset of the source so local time can be recovered at
 the boundary.
 
@@ -103,10 +101,10 @@ end
 
 A meteorological time series and the metadata needed to interpret it.
 
-`time` is always UTC. `data` is a `NamedTuple` of equal-length `Vector{T}`
-rather than a `DataFrame`, which keeps the container generic over `T`. `Float32`,
-`BigFloat`, dual numbers and uncertainty types all pass through unboxed. Use the
-Tables.jl interface for interop with tabular packages.
+`time` is always UTC. `data` is a `NamedTuple` of equal-length `Vector{T}`, which
+keeps the container generic over `T`. `Float32`, `BigFloat`, dual numbers
+and uncertainty types are all supported. Use the Tables.jl interface for interop
+with tabular packages.
 
 Construction validates only that every column matches `length(time)`. Timestamp
 monotonicity, uniform spacing and agreement with `meta.interval` are *not*

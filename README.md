@@ -36,7 +36,7 @@ MeteoData{Float64}: 72 records, 2020-06-20T00:00:00 to 2020-06-22T23:00:00 UTC
   columns:  temp_air, relative_humidity, pressure, ghi, dni, dhi, wind_direction, wind_speed, precipitable_water, albedo
 ```
 
-`read_tmy3` reads NREL TMY3 files. Pressure arrives in Pa, not mbar.
+`read_tmy3` reads NREL TMY3 files. Pressure is given in Pa.
 
 ```julia
 julia> t = read_tmy3("724666TYA.csv");
@@ -58,7 +58,7 @@ julia> round(sum(ghi(md)[1:24]) / 1000, digits = 2)   # kWh/m2 on day one
 7.02
 ```
 
-Accessors return views. A missing column raises at once and lists what is available.
+Accessors return views. A missing column raises an error listing the available columns.
 
 ```julia
 julia> dni(ghi_only)
@@ -67,8 +67,8 @@ ERROR: ArgumentError: this MeteoData has no :dni column. Available columns: (:gh
 
 ## Interval labelling
 
-The labelling convention is a type parameter, not a keyword. Mixing conventions is a
-`MethodError` rather than a silent one-hour shift. EPW and TMY3 are `RightLabeled`.
+The labelling convention is part of the type, so mixing conventions raises a
+`MethodError`. EPW and TMY3 are `RightLabeled`.
 
 ```julia
 julia> md.meta.label, typeof(md).parameters[3]
@@ -77,8 +77,8 @@ julia> md.meta.label, typeof(md).parameters[3]
 
 ## Element type
 
-The container is generic in its element type. `Float32`, `BigFloat`, dual numbers and
-uncertainty types pass through unboxed.
+The element type is generic. `Float32`, `BigFloat`, dual numbers and uncertainty
+types are all supported.
 
 ```julia
 julia> read_epw("NLD_De-Bilt.epw"; T = Float32) isa MeteoData{Float32}
@@ -98,7 +98,8 @@ julia> Tables.schema(md).names
 
 ## Provenance
 
-Header lines and unmapped fields are kept in `meta.extra`. The source bytes are hashed.
+Header lines and unmapped fields are kept in `meta.extra`. The source bytes are
+hashed into `meta.content_hash`.
 
 ```julia
 julia> length(md.meta.extra), md.meta.content_hash
