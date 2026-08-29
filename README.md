@@ -24,7 +24,8 @@ pkg> add https://github.com/JuliaSolarPV/PVMeteo.jl
 
 ## Reading a file
 
-Metadata comes from the file header. Timestamps are converted to UTC and units are SI.
+Metadata comes from the file header, timestamps are automatically converted to UTC and
+units are always in SI.
 
 ```julia
 julia> using PVMeteo
@@ -95,13 +96,21 @@ true
 
 ## Tables.jl interface
 
-`MeteoData` implements the Tables.jl interface, with `time` always as the first column.
+`MeteoData` implements the `Tables.jl` interface, with `time` always as the first column.
 
 ```julia
 julia> using Tables
 
 julia> Tables.schema(md).names
 (:time, :temp_air, :relative_humidity, :pressure, :ghi, :dni, :dhi, :wind_direction, :wind_speed, :precipitable_water, :albedo)
+```
+
+This means you can also use `MeteoData` with any package that supports the `Tables.jl` interface, such as `DataFrames.jl`.
+
+```julia
+julia> using DataFrames
+
+julia> df = DataFrame(md);
 ```
 
 ## How to Cite
