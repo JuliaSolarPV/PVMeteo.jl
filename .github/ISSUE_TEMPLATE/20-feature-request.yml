@@ -9,7 +9,7 @@ body:
         Please, before submitting, make sure that:
 
         - There is not an [existing issue](https://github.com/JuliaSolarPV/PVMeteo.jl/issues) with the same question
-        - You have read the [contributing guide](https://github.com/JuliaSolarPV/PVMeteo.jl/blob/main/README.md#contributing)
+        - You have read the [contributing guide](https://github.com/JuliaSolarPV/PVMeteo.jl/blob/main/CONTRIBUTING.md)
         - You are following the [code of conduct](https://github.com/JuliaSolarPV/PVMeteo.jl/blob/main/CODE_OF_CONDUCT.md)
         The form below should help you in filling out this issue.
   - type: textarea

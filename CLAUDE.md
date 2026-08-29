@@ -7,10 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 PVMeteo.jl is **pre-implementation**. `src/PVMeteo.jl` is still the template stub (`hello_world`), and
 `test/test-basic-test.jl` tests only that stub. The real specification lives in **`pvmeteo-design.md`** —
 treat it as the authoritative source for types, module layout, naming, and build order. Read it before
-writing any `src/` code, and update it when a design decision changes during implementation.
+writing any `src/` code, and update it when a design decision changes during implementation. Note that
+it is **gitignored on purpose** — it is a local working document, so never link to it from a tracked
+file (the CI link checker fails on it) and do not assume a fresh clone has it.
 
-There is no `docs/` directory and no Documenter site: **the README is the documentation**. User-facing
-and contributor-facing changes go there.
+There is no `docs/` directory and no Documenter site. The README is a short landing page; the
+contributor and developer guide is `CONTRIBUTING.md`.
 
 The repo was generated from [BestieTemplate.jl](https://github.com/JuliaBesties/BestieTemplate.jl)
 (see `.copier-answers.yml`), but has since diverged from it (docs stack and all-contributors removed),
@@ -86,4 +88,4 @@ closure QC → `relabel`/`subset` → everything else) and §10 lists the invari
 - Commit messages use imperative present tense.
 - Releases: bump `version` in `Project.toml`, move the `CHANGELOG.md` "Unreleased" section to
   `[x.y.z] - yyyy-mm-dd` with a new link at the bottom, merge, then comment `@JuliaRegistrator register`
-  on the merge commit. Full procedure in the README.
+  on the merge commit. Full procedure in `CONTRIBUTING.md`.

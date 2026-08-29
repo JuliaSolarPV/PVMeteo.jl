@@ -21,7 +21,7 @@ There is no related issue.
 
 <!-- mark true if NA -->
 <!-- leave PR as draft until all is checked -->
-- [ ] I am following the [contributing guidelines](https://github.com/JuliaSolarPV/PVMeteo.jl/blob/main/README.md#contributing)
+- [ ] I am following the [contributing guidelines](https://github.com/JuliaSolarPV/PVMeteo.jl/blob/main/CONTRIBUTING.md)
 - [ ] Tests are passing
 - [ ] Lint workflow is passing
 - [ ] The README was updated if the change affects it
