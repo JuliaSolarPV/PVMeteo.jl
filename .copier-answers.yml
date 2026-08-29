@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier
+AddPrecommitUpdateCI: false
+Authors: Stefan de Lange <langestefan@msn.com>
+JuliaMinVersion: '1.10'
+License: MIT
+LicenseCopyrightHolders: Stefan de Lange
+PackageName: PVMeteo
+PackageOwner: JuliaSolarPV
+PackageUUID: 14419f4e-7e79-55b1-b805-7425b2ac4d31
+StrategyConfirmIncluded: false
+StrategyLevel: 3
+StrategyReviewExcluded: false
+_src_path: /home/langestefan/.julia/packages/BestieTemplate/MPEqY

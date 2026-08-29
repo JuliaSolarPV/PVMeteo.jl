@@ -1,0 +1,94 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project state
+
+PVMeteo.jl is **pre-implementation**. `src/PVMeteo.jl` is still the template stub (`hello_world`), and
+`test/test-basic-test.jl` tests only that stub. The real specification lives in **`pvmeteo-design.md`** —
+treat it as the authoritative source for types, module layout, naming, and build order. Read it before
+writing any `src/` code. When a design decision changes during implementation, update that file too.
+
+The repo was generated from [BestieTemplate.jl](https://github.com/JuliaBesties/BestieTemplate.jl)
+(see `.copier-answers.yml`); template-owned files are refreshed by `copier update`, so prefer making
+project-specific changes in `src/`, `test/`, `docs/src/`, and the design doc.
+
+## Commands
+
+Julia 1.10+ is the compat floor. `Project.toml` declares a **workspace** (`projects = ["test", "docs"]`),
+so `test/` and `docs/` are separate environments that `dev` the root package via `[sources]`.
+
+```bash
+# Full test suite
+julia --project=. -e 'using Pkg; Pkg.test()'
+
+# Docs: build once
+julia --project=docs docs/make.jl
+
+# Docs: live-reloading preview at localhost:8000
+julia --project=docs -e 'using LiveServer; servedocs()'
+
+# Lint + format everything (JuliaFormatter, markdownlint, yamlfmt, yamllint, cff)
+pre-commit run -a
+
+# Link check (same config CI uses)
+lychee --no-progress --config .lychee.toml .
+```
+
+`pre-commit install` is expected — commits are blocked unless the hooks pass, and
+`no-commit-to-branch` forbids committing directly to `main`.
+
+### Running a subset of tests
+
+Tests use **TestItemRunner**, not a `Test.jl` include tree. `test/runtests.jl` is just
+`@run_package_tests verbose=true`; every test lives in a `@testitem` block in a `test/test-*.jl` file,
+with shared fixtures in `@testsnippet` / `@testmodule` blocks referenced via `setup=[...]`.
+
+```bash
+# One test item by name
+julia --project=test -e 'using TestItemRunner; @run_package_tests filter=ti -> ti.name == "Basic functionality test"'
+
+# By tag (existing tags: :unit, :fast, :slow, :integration, :validation)
+julia --project=test -e 'using TestItemRunner; @run_package_tests filter=ti -> :fast in ti.tags'
+```
+
+Each `@testitem` runs in its own module and must be self-contained: reference the package as
+`PVMeteo.foo()` or add `using PVMeteo` inside the item; do not rely on top-level state from
+`runtests.jl`. New test files must match `test-*.jl` to be discovered.
+
+## Architecture constraints from the design
+
+These are the invariants most likely to be violated by an otherwise reasonable change:
+
+- **Layering.** PVMeteo is the data layer *beneath* the PV model chain. It must never import a chain
+  type (e.g. `ChainSpec`). Anything requiring chain knowledge belongs in the consumer, not here.
+- **Core dependencies are `Dates`, `Tables`, `CSV` only.** `HTTP`, `TimeZones`, `Parquet2`, `Arrow`, and
+  `Makie` all go in package extensions under `ext/`. Keeping `TimeZones` out of the core is deliberate —
+  users passing a plain `DateTime` should not pull TZJData.
+- **`MeteoData` holds a `NamedTuple` of vectors, not a `DataFrame`,** so the element type `T` stays
+  generic (`Float32`, `Dual`, `Particles`). Interop comes from implementing the Tables.jl interface.
+- **Timestamps are UTC internally, always.** Local time is a boundary/presentation concern.
+- **Interval labelling (`LeftLabeled`/`RightLabeled`/`CenterLabeled`) is a type parameter, not a keyword,**
+  so a mismatch is a method error rather than a silent hour shift.
+- **Units are SI, no `Unitful`** — enforced by documentation and tests.
+- **Parsing never rejects data.** Readers report what they found and stash unknown fields in
+  `meta.extra`; `validate` returns a `QCReport` and never mutates.
+- **Every transform returns a new `MeteoData` and appends to `meta.lineage`.** Reproducibility is
+  `content_hash` + `lineage`, not the source path.
+
+`pvmeteo-design.md` §11 gives the intended build order (types → EPW/TMY3 readers → timestamp and
+closure QC → `relabel`/`subset` → everything else) and §10 lists the invariants that tests must cover.
+
+## Conventions
+
+- Formatting: 4-space indent, **92-column margin**, LF endings (`.JuliaFormatter.toml`). Run the
+  formatter through `pre-commit`; the config file itself is kept sorted+unique by a hook.
+- Branch names are dash-separated imperative, prefixed with the issue number when one exists
+  (`14-add-epw-reader`); otherwise use a `typo`/`hotfix`/`small-refactor` prefix for small changes.
+- Commit messages use imperative present tense.
+- Releases: bump `version` in `Project.toml`, move the `CHANGELOG.md` "Unreleased" section to
+  `[x.y.z] - yyyy-mm-dd` with a new link at the bottom, merge, then comment `@JuliaRegistrator register`
+  on the merge commit. Full procedure in `docs/src/91-developer.md`.
+- Docs pages are auto-discovered by `docs/make.jl` from `docs/src/`; filenames are numbered to control
+  ordering, and a page whose title should differ from its filename must be added to the `titles` dict
+  in `docs/make.jl` (a subfolder without an entry there raises an error at build time).
