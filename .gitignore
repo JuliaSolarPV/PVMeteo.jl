@@ -7,6 +7,6 @@
 Manifest.toml
 benchmark/*.json
 coverage
-docs/build/
 env
 node_modules
+pvmeteo-design.md

@@ -7,26 +7,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 PVMeteo.jl is **pre-implementation**. `src/PVMeteo.jl` is still the template stub (`hello_world`), and
 `test/test-basic-test.jl` tests only that stub. The real specification lives in **`pvmeteo-design.md`** —
 treat it as the authoritative source for types, module layout, naming, and build order. Read it before
-writing any `src/` code. When a design decision changes during implementation, update that file too.
+writing any `src/` code, and update it when a design decision changes during implementation.
+
+There is no `docs/` directory and no Documenter site: **the README is the documentation**. User-facing
+and contributor-facing changes go there.
 
 The repo was generated from [BestieTemplate.jl](https://github.com/JuliaBesties/BestieTemplate.jl)
-(see `.copier-answers.yml`); template-owned files are refreshed by `copier update`, so prefer making
-project-specific changes in `src/`, `test/`, `docs/src/`, and the design doc.
+(see `.copier-answers.yml`), but has since diverged from it (docs stack and all-contributors removed),
+so a `copier update` will want to reintroduce those — reject those hunks.
 
 ## Commands
 
-Julia 1.10+ is the compat floor. `Project.toml` declares a **workspace** (`projects = ["test", "docs"]`),
-so `test/` and `docs/` are separate environments that `dev` the root package via `[sources]`.
+Julia 1.10+ is the compat floor. `Project.toml` declares a **workspace** (`projects = ["test"]`), so
+`test/` is a separate environment that picks up the root package through `[sources]`.
 
 ```bash
 # Full test suite
 julia --project=. -e 'using Pkg; Pkg.test()'
-
-# Docs: build once
-julia --project=docs docs/make.jl
-
-# Docs: live-reloading preview at localhost:8000
-julia --project=docs -e 'using LiveServer; servedocs()'
 
 # Lint + format everything (JuliaFormatter, markdownlint, yamlfmt, yamllint, cff)
 pre-commit run -a
@@ -35,26 +32,27 @@ pre-commit run -a
 lychee --no-progress --config .lychee.toml .
 ```
 
-`pre-commit install` is expected — commits are blocked unless the hooks pass, and
-`no-commit-to-branch` forbids committing directly to `main`.
-
 ### Running a subset of tests
 
 Tests use **TestItemRunner**, not a `Test.jl` include tree. `test/runtests.jl` is just
 `@run_package_tests verbose=true`; every test lives in a `@testitem` block in a `test/test-*.jl` file,
 with shared fixtures in `@testsnippet` / `@testmodule` blocks referenced via `setup=[...]`.
 
-```bash
-# One test item by name
-julia --project=test -e 'using TestItemRunner; @run_package_tests filter=ti -> ti.name == "Basic functionality test"'
+To filter, call `run_tests` with an explicit path rather than the `@run_package_tests` macro — from
+`-e` the macro resolves its default path to the *parent* of the repo, which leaves the package name
+empty and the test items then fail with `UndefVarError: PVMeteo not defined`:
 
+```bash
 # By tag (existing tags: :unit, :fast, :slow, :integration, :validation)
-julia --project=test -e 'using TestItemRunner; @run_package_tests filter=ti -> :fast in ti.tags'
+julia --project=test -e 'using TestItemRunner; TestItemRunner.run_tests("."; filter = ti -> :fast in ti.tags, verbose = true)'
+
+# By name
+julia --project=test -e 'using TestItemRunner; TestItemRunner.run_tests("."; filter = ti -> ti.name == "Basic functionality test")'
 ```
 
-Each `@testitem` runs in its own module and must be self-contained: reference the package as
-`PVMeteo.foo()` or add `using PVMeteo` inside the item; do not rely on top-level state from
-`runtests.jl`. New test files must match `test-*.jl` to be discovered.
+Each `@testitem` runs in its own module and must be self-contained: `PVMeteo` is injected
+automatically, but anything else needs an explicit `using` inside the item or a `setup=[...]` module.
+New test files must match `test-*.jl` to be discovered.
 
 ## Architecture constraints from the design
 
@@ -88,7 +86,4 @@ closure QC → `relabel`/`subset` → everything else) and §10 lists the invari
 - Commit messages use imperative present tense.
 - Releases: bump `version` in `Project.toml`, move the `CHANGELOG.md` "Unreleased" section to
   `[x.y.z] - yyyy-mm-dd` with a new link at the bottom, merge, then comment `@JuliaRegistrator register`
-  on the merge commit. Full procedure in `docs/src/91-developer.md`.
-- Docs pages are auto-discovered by `docs/make.jl` from `docs/src/`; filenames are numbered to control
-  ordering, and a page whose title should differ from its filename must be added to the `titles` dict
-  in `docs/make.jl` (a subfolder without an entry there raises an error at build time).
+  on the merge commit. Full procedure in the README.
