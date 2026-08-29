@@ -1,7 +1,7 @@
 @testsnippet ProvFixture begin
     using Dates
 
-    function meta_with(; lineage = Symbol[], extra = Dict{Symbol, Any}())
+    function meta_with(; lineage = Symbol[], extra = Dict{Symbol,Any}())
         return PVMeteo.MeteoMeta(;
             latitude = 52.0,
             longitude = 4.9,
@@ -59,14 +59,25 @@ end
 @testitem "with_lineage carries the rest across" tags=[:unit, :fast] setup=[ProvFixture] begin
     original = meta_with()
     derived = PVMeteo.with_lineage(original, :relabel)
-    for f in (:latitude, :longitude, :altitude, :utc_offset, :label, :interval,
-              :source, :origin, :retrieved, :content_hash, :station)
+    for f in (
+        :latitude,
+        :longitude,
+        :altitude,
+        :utc_offset,
+        :label,
+        :interval,
+        :source,
+        :origin,
+        :retrieved,
+        :content_hash,
+        :station,
+    )
         @test getfield(derived, f) == getfield(original, f)
     end
 end
 
 @testitem "with_lineage copies extra" tags=[:unit, :fast] setup=[ProvFixture] begin
-    original = meta_with(; extra = Dict{Symbol, Any}(:comments_1 => "hi"))
+    original = meta_with(; extra = Dict{Symbol,Any}(:comments_1 => "hi"))
     derived = PVMeteo.with_lineage(original, :subset)
     @test derived.extra == original.extra
     derived.extra[:comments_1] = "changed"
