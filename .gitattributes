@@ -1,0 +1,4 @@
+# Test fixtures are compared byte for byte against their generator, which always
+# writes LF. Git must not translate them on checkout.
+test/fixtures/*.epw -text
+test/fixtures/*.csv -text
