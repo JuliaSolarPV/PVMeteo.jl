@@ -1,4 +1,4 @@
-@testitem "MeteoMeta is concrete and carries the label in its type" tags=[:unit, :fast] begin
+@testitem "MeteoMeta is concrete and typed by label" tags=[:unit, :fast] begin
     using Dates
     m = PVMeteo.MeteoMeta(;
         latitude = 52.0,
@@ -13,7 +13,7 @@
         content_hash = UInt64(7),
     )
     @test isconcretetype(typeof(m))
-    @test m isa PVMeteo.MeteoMeta{PVMeteo.RightLabeled, Hour}
+    @test m isa PVMeteo.MeteoMeta{PVMeteo.RightLabeled,Hour}
     @test m.lineage == Symbol[]
     @test m.station === nothing
     @test isempty(m.extra)
@@ -31,8 +31,16 @@ end
         retrieved = DateTime(2026, 1, 1),
         content_hash = UInt64(0),
     )
-    @test_throws ArgumentError PVMeteo.MeteoMeta(; latitude = 91.0, longitude = 0.0, base...)
-    @test_throws ArgumentError PVMeteo.MeteoMeta(; latitude = 0.0, longitude = -181.0, base...)
+    @test_throws ArgumentError PVMeteo.MeteoMeta(;
+        latitude = 91.0,
+        longitude = 0.0,
+        base...,
+    )
+    @test_throws ArgumentError PVMeteo.MeteoMeta(;
+        latitude = 0.0,
+        longitude = -181.0,
+        base...,
+    )
 end
 
 @testitem "The interval labels are distinct singletons" tags=[:unit, :fast] begin
