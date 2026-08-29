@@ -1,19 +1,6 @@
-# NREL TMY3.
-#
-# Two header lines, station metadata and then column names, followed by data. The
-# hour field runs 1..24 and labels the end of the interval, as in EPW, but the
-# irradiance is already power rather than accumulated energy.
-
 """
-    tmy3_local_stamp(year, month, day, hour, minute) -> DateTime
-
-The local end-of-interval instant a TMY3 row describes.
-
-TMY3 writes that instant directly. `01:00` is the hour ending at 01:00, and the
-hour runs 1..24 so `24:00` rolls into midnight of the next day. This is *not*
-EPW's encoding, which splits the same instant into an hour 1..24 plus a minute
-1..60 counted inside it. Sharing one rule between the two shifts every TMY3
-record back by an hour.
+Local end-of-interval instant of a TMY3 row. The timestamp is written directly,
+so `01:00` is the hour ending at 01:00. This is not EPW's encoding.
 """
 function tmy3_local_stamp(y::Int, mo::Int, d::Int, hour::Int, minute::Int)
     1 <= hour <= 24 || throw(ArgumentError("TMY3 hour $hour is outside 1:24"))
@@ -40,14 +27,23 @@ const TMY3_MAPPED = (
 
 Read an NREL TMY3 file.
 
-Metadata comes from the file's first line. Timestamps are `MM/DD/YYYY` plus an
-`HH:MM` whose hour runs 1..24 and labels the end of the interval, so they are
-read with the same rule as EPW and converted to UTC using the declared offset.
+Two header lines precede the data, carrying station metadata and then column
+names. Timestamps are `MM/DD/YYYY` plus an `HH:MM` whose hour runs 1..24 and
+labels the end of the interval, and they are converted to UTC using the declared
+offset. Note that `01:00` means the hour ending at 01:00, which is not how EPW
+encodes the same instant.
+
+Irradiance is already power here, unlike EPW, where it is energy accumulated over
+the record. No interval scaling is applied.
 
 Every column without a canonical name is kept in `meta.extra` under its name as
 written in the file. That includes the `source` and `uncert (%)` columns.
 
 Parsing never rejects. Use [`validate`](@ref) to inspect what was read.
+
+`coerce_year` rewrites every year field before timestamps are built, for files
+that stitch months from different years. The originals are kept in
+`meta.extra[:source_years]`.
 """
 function read_tmy3(path::AbstractString; T::Type = Float64, coerce_year = nothing)
     lines = readlines(path)

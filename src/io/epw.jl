@@ -1,9 +1,3 @@
-# EnergyPlus Weather (EPW).
-#
-# Eight header lines, then comma-separated data rows of 35 fields. The header
-# carries coordinates, elevation, UTC offset and the record interval, so the
-# reader never asks the user to restate what the file already says.
-
 """Index, canonical name and unit conversion for the fields we map."""
 const EPW_MAPPED = (
     (7, :temp_air, identity),                    # °C
@@ -57,13 +51,8 @@ const EPW_HEADER_KEYS = (
 )
 
 """
-    epw_local_stamp(year, month, day, hour, minute) -> DateTime
-
-The local end-of-interval instant a row describes.
-
-EPW hour `h` runs 1..24 and covers `(h-1):00` to `h:00`. The minute field runs
-1..60 within that hour. Counting from the start of hour `h-1` handles the
-hour-24 rollover into the next day and sub-hourly records with one rule.
+Local end-of-interval instant of an EPW row. Hour 1..24 covers `(h-1):00` to
+`h:00`, with the minute counted inside that hour.
 """
 function epw_local_stamp(y::Int, m::Int, d::Int, hour::Int, minute::Int)
     1 <= hour <= 24 || throw(ArgumentError("EPW hour $hour is outside 1:24"))
@@ -76,8 +65,10 @@ end
 
 Read an EnergyPlus Weather file.
 
-Metadata comes from the file's own header. Timestamps are converted to UTC using
-the offset the header declares. EPW is written in local *standard* time, so a
+Eight header lines precede comma-separated data rows of 35 fields. Coordinates,
+elevation, UTC offset and the record interval all come from that header, so the
+reader never asks the caller to restate what the file already says. Timestamps
+are converted to UTC using the offset the header declares. EPW is written in local *standard* time, so a
 file spanning a daylight-saving transition still yields uniform UTC.
 
 Nothing is discarded: the seven non-`LOCATION` header lines and every data field

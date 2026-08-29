@@ -152,14 +152,8 @@ function Base.show(io::IO, ::MIME"text/plain", md::MeteoData{T,N}) where {T,N}
 end
 
 """
-    canonical_interval(p::Period) -> Period
-
-The same span expressed in the coarsest unit that divides it exactly.
-
-Intervals are often derived by division (an hour split into `n` records), which
-leaves a `Millisecond` even when the span is a whole hour. That value is correct
-but reads badly and makes `MeteoMeta`'s type parameter depend on how the number
-was reached rather than on what it is.
+The same span in the coarsest unit that divides it exactly. An interval derived
+by division is a `Millisecond` even when it is a whole hour.
 """
 function canonical_interval(p::Period)
     ms = Dates.toms(p)
