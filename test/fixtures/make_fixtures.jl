@@ -373,8 +373,10 @@ function make_all(dir = HERE)
         write_epw(dir, "closure_good.epw", local_stamps(Date(2020, 6, 20), 2, 1), 1.0, 1),
     )
 
-    # Closure: DHI inflated 30% at these 1-based record indices, chosen to be
-    # daylight hours on both days. test-qc-closure.jl asserts exactly this set.
+    # Closure: DHI tripled at these 1-based record indices, chosen to be daylight
+    # hours on both days. test-qc-closure.jl asserts exactly this set. DHI is about
+    # a tenth of GHI under a clear sky, so a smaller inflation moves the closure
+    # ratio by a few percent and stays inside the tolerance.
     bad_indices = [12, 13, 14, 36, 37, 38]
     push!(
         written,
@@ -385,7 +387,7 @@ function make_all(dir = HERE)
             1.0,
             1;
             corrupt = (i, ghi, dni, dhi, μ) ->
-                i in bad_indices ? (ghi, dni, 1.3 * dhi) : (ghi, dni, dhi),
+                i in bad_indices ? (ghi, dni, 3 * dhi) : (ghi, dni, dhi),
         ),
     )
 
