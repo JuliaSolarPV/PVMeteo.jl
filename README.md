@@ -48,6 +48,25 @@ julia> t.meta.utc_offset, t.time[1], first(pressure(t))
 
 ## Columns
 
+Readers map each source onto a fixed set of canonical columns, always in SI units.
+No source carries all of them.
+
+| Column | Quantity | Unit |
+|:---|:---|:---|
+| `:ghi` | global horizontal irradiance | W/m2 |
+| `:dni` | direct normal irradiance | W/m2 |
+| `:dhi` | diffuse horizontal irradiance | W/m2 |
+| `:temp_air` | air temperature | degC |
+| `:wind_speed` | wind speed | m/s |
+| `:wind_direction` | wind direction | deg |
+| `:pressure` | air pressure | Pa |
+| `:relative_humidity` | relative humidity | % |
+| `:albedo` | surface albedo | dimensionless |
+| `:precipitable_water` | precipitable water | cm |
+
+Anything a reader cannot map to one of these is kept in `md.meta.extra`. The
+timestamps live in `md.time` and are not a column.
+
 ```julia
 julia> datacolumns(md)
 (:temp_air, :relative_humidity, :pressure, :ghi, :dni, :dhi, :wind_direction, :wind_speed, :precipitable_water, :albedo)
@@ -58,6 +77,14 @@ julia> hascolumn(md, :dni), hascolumn(md, :snow_depth)
 julia> round(sum(ghi(md)[1:24]) / 1000, digits = 2)   # kWh/m2 on day one
 7.02
 ```
+
+Three calls report column names, and they answer different questions.
+
+| Call | Returns | `time` included |
+|:---|:---|:---|
+| `datacolumns(md)` | names of the data columns | no |
+| `Tables.columnnames(Tables.columns(md))` | names | yes |
+| `Tables.columns(md)` | the column vectors | yes |
 
 Accessors return views. A missing column raises an error listing the available columns.
 
@@ -104,9 +131,6 @@ true
 | `Tables.columnaccess` | `true` |
 | `Tables.columns` | a `NamedTuple` of the columns, `time` first |
 | `Tables.schema` | the names and types, without touching the data |
-
-`Tables.columns(md)` returns the column vectors and includes `time`. The package's
-own `datacolumns(md)` returns just the names of the data columns.
 
 ```julia
 julia> using Tables
