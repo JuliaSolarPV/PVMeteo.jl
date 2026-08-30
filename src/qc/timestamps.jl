@@ -3,12 +3,14 @@
 
 Inspect the time axis of `md`.
 
-Reports four things. `:duplicate_ts` marks a record whose timestamp repeats its
-predecessor. `:non_monotonic` marks a record that moves backwards. `:gap` marks the
-record after a hole, with the missing span in its detail. `:spacing_mismatch` fires
-once when the most common spacing disagrees with `meta.interval`.
+| Check | Marks |
+|:---|:---|
+| `:duplicate_ts` | a record whose timestamp repeats its predecessor |
+| `:non_monotonic` | a record that moves backwards |
+| `:gap` | the record after a hole, with the missing span in its detail |
+| `:spacing_mismatch` | once, when the most common spacing differs from `meta.interval` |
 
-All four describe the time axis, so none of them names a column.
+All four describe the time axis, so their `column` is `nothing`.
 """
 function check_timestamps(md::MeteoData)
     flags = QCFlag[]

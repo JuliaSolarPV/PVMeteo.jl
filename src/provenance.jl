@@ -7,9 +7,8 @@ content_hash(bytes::AbstractVector{UInt8}) = content_hash(Vector{UInt8}(bytes))
 content_hash(path::AbstractString) = content_hash(read(path))
 
 """
-A copy of `meta` that records `op` as the operation just applied, optionally under a
-new interval label. `extra` is copied, so a write through one object cannot alter
-another derived from it.
+A copy of `meta` with `op` appended to `meta.history`, optionally under a new
+interval label. `extra` is copied, so each `meta` owns its own.
 """
 function with_history(meta::MeteoMeta, op::Symbol; label::IntervalLabel = meta.label)
     return MeteoMeta(;

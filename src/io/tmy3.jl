@@ -1,6 +1,6 @@
 """
-Local end-of-interval instant of a TMY3 row. The timestamp is written directly,
-so `01:00` is the hour ending at 01:00. This is not EPW's encoding.
+Local end-of-interval instant of a TMY3 row, written directly, so `01:00` is the
+hour ending at 01:00.
 """
 function tmy3_local_stamp(y::Int, mo::Int, d::Int, hour::Int, minute::Int)
     1 <= hour <= 24 || throw(ArgumentError("TMY3 hour $hour is outside 1:24"))
@@ -29,19 +29,14 @@ split_fields(row::String) = strip.(split(row, ','))
 
 Read an NREL TMY3 file.
 
-Two header lines precede the data, carrying station metadata and then column
-names. Timestamps are `MM/DD/YYYY` plus an `HH:MM` whose hour runs 1..24 and
-labels the end of the interval, and they are converted to UTC using the declared
-offset. Note that `01:00` means the hour ending at 01:00, which is not how EPW
-encodes the same instant.
-
-Irradiance is already power here, unlike EPW, where it is energy accumulated over
-the record. No interval scaling is applied.
+Station metadata and column names come from the two header lines. Timestamps are
+`MM/DD/YYYY` plus an `HH:MM` whose hour runs 1..24 and labels the end of the
+interval, converted to UTC with the declared offset. Irradiance is already in
+W/m^2. Pressure is converted from mbar to Pa.
 
 Every column without a canonical name is kept in `meta.extra` under its name as
-written in the file. That includes the `source` and `uncert (%)` columns.
-
-Parsing never rejects. Use [`validate`](@ref) to inspect what was read.
+written in the file, including the `source` and `uncert (%)` columns. Use
+[`validate`](@ref) to inspect what was read.
 
 `coerce_year` rewrites every year field before timestamps are built, for files
 that stitch months from different years. The originals are kept in

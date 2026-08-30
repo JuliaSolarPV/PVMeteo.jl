@@ -16,9 +16,7 @@ The canonical column names, in SI units throughout.
 | `:albedo`             | none  |
 | `:precipitable_water` | cm    |
 
-Units are not carried in the type. `Unitful` composes badly with the dual and
-uncertainty numbers threaded through a model chain, so units are documented here
-and asserted in the test suite instead.
+Units live in this table and are asserted in the test suite.
 """
 const CANONICAL = (
     :ghi,
@@ -34,18 +32,16 @@ const CANONICAL = (
 )
 
 """
-The canonical columns that measure irradiance. These share bounds, share a unit,
-and are zero every night, so several checks treat them together.
+The canonical columns that measure irradiance. Several checks treat them
+together.
 """
 const IRRADIANCE = (:ghi, :dni, :dhi)
 
 """
     hascolumn(md::MeteoData, name::Symbol) -> Bool
 
-Whether `md` carries a column called `name`, including `:time`.
-
-This is the hook for trait validation upstream. A model stage that needs beam
-components can check for them before it runs.
+Whether `md` carries a column called `name`, including `:time`. A model stage can
+check for the columns it needs before it runs.
 """
 hascolumn(md::MeteoData, name::Symbol) = name in Tables.columnnames(md)
 
@@ -53,7 +49,7 @@ hascolumn(md::MeteoData, name::Symbol) = name in Tables.columnnames(md)
     time(md::MeteoData)
 
 A view of the timestamps, always UTC. This is a method on `Base.time`, so it needs
-no import and does not shadow `time()`.
+no import.
 """
 Base.time(md::MeteoData) = @view md.time[:]
 

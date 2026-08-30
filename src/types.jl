@@ -3,9 +3,9 @@
 
 Where a timestamp sits inside the interval it labels.
 
-Irradiance is integrated over an interval and the sun moves within it, so reading
-a left-labelled file as right-labelled shifts every record by one interval.
-Encoding the convention in the type makes a mismatch a method error.
+Irradiance is integrated over the interval and the sun moves within it, so the
+convention is a type parameter of [`MeteoMeta`](@ref) and a mismatch is a method
+error.
 """
 abstract type IntervalLabel end
 
@@ -38,12 +38,9 @@ struct CenterLabeled <: IntervalLabel end
 Everything needed to interpret a [`MeteoData`](@ref), and enough provenance to
 reproduce it.
 
-`interval` is a type parameter so the struct stays concrete. Timestamps in the accompanying data are always UTC.
-`utc_offset` records the offset of the source so local time can be recovered at
-the boundary.
-
-Anything a parser could not map to a canonical column lands in `extra`. No
-reader silently drops information.
+`label` and `interval` are type parameters, so the struct stays concrete.
+`utc_offset` is the offset of the source, which recovers local time from the UTC
+timestamps. `extra` holds every field a reader found without a canonical name.
 """
 struct MeteoMeta{L<:IntervalLabel,P<:Period}
     latitude::Float64
@@ -133,16 +130,13 @@ end
 
 A meteorological time series and the metadata needed to interpret it.
 
-`time` is always UTC. `data` is a `NamedTuple` of equal-length `Vector{T}`, which
-keeps the container generic over `T`. `Float32`, `BigFloat`, dual numbers
-and uncertainty types are all supported. Use the Tables.jl interface for interop
-with tabular packages.
+`time` is always UTC. `data` is a `NamedTuple` of equal-length `Vector{T}`, so `T`
+is free: `Float32`, `BigFloat`, dual numbers and uncertainty types all work. The
+Tables.jl interface gives interop with tabular packages.
 
-Construction validates only that every column matches `length(time)`. Timestamp
-monotonicity, uniform spacing and agreement with `meta.interval` are *not*
-enforced here: reading a file must never reject data, and a source with DST
-artefacts has to be constructible for quality control to report on it. Use
-[`validate`](@ref) for those checks.
+Construction checks that every column matches `length(time)`. Use
+[`validate`](@ref) for timestamp monotonicity, spacing and agreement with
+`meta.interval`.
 """
 struct MeteoData{T,N,L<:IntervalLabel,P<:Period,C<:NamedTuple{N,<:Tuple{Vararg{Vector{T}}}}}
     time::Vector{DateTime}
@@ -194,8 +188,8 @@ function Base.show(io::IO, ::MIME"text/plain", md::MeteoData{T,N}) where {T,N}
 end
 
 """
-The same span in the coarsest unit that divides it exactly. An interval derived
-by division is a `Millisecond` even when it is a whole hour.
+The same span in the coarsest unit that divides it exactly, so
+`Millisecond(3600000)` becomes `Hour(1)`.
 """
 function canonical_interval(p::Period)
     ms = Dates.toms(p)

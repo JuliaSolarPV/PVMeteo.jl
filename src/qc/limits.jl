@@ -5,7 +5,7 @@ Coefficients for the BSRN physically-possible and extremely-rare limits.
 
 The bounds come from the Baseline Surface Radiation Network quality control
 procedure and scale with `mu = cos(zenith)`, because the largest irradiance the
-sky can deliver depends on how high the sun is. `Sa` below is the extraterrestrial
+sky can deliver depends on how high the sun is. `Sa` is the extraterrestrial
 normal irradiance for the day.
 
 | Quantity | Physically possible | Extremely rare |
@@ -14,8 +14,8 @@ normal irradiance for the day.
 | DNI | `-4` to `Sa` | `-2` to `Sa*0.95*mu^0.2 + 10` |
 | DHI | `-4` to `Sa*0.95*mu^1.2 + 50` | `-2` to `Sa*0.75*mu^1.2 + 30` |
 
-The lower bounds are negative on purpose. A pyranometer radiating to a cold night
-sky reads slightly below zero, and that thermal offset is normal behaviour.
+The lower bounds are negative because a pyranometer radiating to a cold night sky
+reads slightly below zero.
 """
 Base.@kwdef struct BSRN
     possible_floor::Float64 = -4.0
@@ -46,15 +46,12 @@ const LIMIT_CEILINGS = (
 """
     check_limits(md::MeteoData, cosz, limits::BSRN = BSRN()) -> Vector{QCFlag}
 
-Screen the irradiance columns against the BSRN bounds.
+Screen the irradiance columns `md` carries against the BSRN bounds.
 
 `cosz` is the cosine of the solar zenith angle at each record, supplied by the
-caller. Columns the source does not carry are skipped.
-
-A value outside the physically-possible band is an `:error`, since it cannot be
-real and usually means a unit or scaling fault. A value only outside the
-extremely-rare band is a `:warn`, since it can happen under cloud enhancement but
-more often means drift or a soiled dome.
+caller. A value outside the physically possible band is an `:error`, which usually
+means a unit or scaling fault. A value outside only the extremely rare band is a
+`:warn`, which usually means drift or a soiled dome.
 """
 function check_limits(md::MeteoData, cosz, limits::BSRN = BSRN())
     n = length(md.time)
@@ -107,9 +104,8 @@ end
     check_constant_runs(md::MeteoData; minimum_run = 6) -> Vector{QCFlag}
 
 Find runs of `minimum_run` or more identical consecutive values, which suggest a
-stuck sensor.
-
-Runs of zero in the irradiance columns are skipped, because every night is one.
+stuck sensor. In the irradiance columns only nonzero runs count, since every night
+is a run of zeros.
 """
 function check_constant_runs(md::MeteoData; minimum_run::Integer = 6)
     minimum_run >= 2 ||

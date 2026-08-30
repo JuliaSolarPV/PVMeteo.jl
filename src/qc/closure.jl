@@ -1,6 +1,6 @@
 """
-Below this GHI the closure ratio is dominated by sensor offsets rather than by the
-components, so the check has nothing to say.
+The closure check runs above this GHI, where the components dominate the ratio
+rather than sensor offsets.
 """
 const CLOSURE_MIN_GHI = 50.0
 
@@ -23,14 +23,13 @@ const NIGHT_MAX_GHI = 5.0
 Test the three irradiance components against `ghi == dhi + dni * cos(zenith)`.
 
 `cosz` is the cosine of the solar zenith angle at each record, supplied by the
-caller. A ratio further from one than `tol` is a `:closure` error below 75 degrees
-zenith, and further than 0.15 between 75 and 93 degrees. Records with GHI at or
-below 50 W/m^2, and records with the sun past 93 degrees, are skipped.
+caller. The test runs where GHI is above 50 W/m^2 and the sun is within 93 degrees
+of the zenith. A ratio further from one than `tol` is a `:closure` error inside 75
+degrees, and further than 0.15 between 75 and 93 degrees.
 
 `:night_nonzero` is a warning for GHI above 5 W/m^2 with the sun past 95 degrees.
-
-A source missing any of the three components yields a single `:info` flag naming
-what is absent.
+`:closure_unavailable` is an `:info` flag naming whichever of the three components
+the source is missing.
 """
 function check_closure(md::MeteoData, cosz; tol::Real = 0.08)
     nrec = length(md.time)

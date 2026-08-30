@@ -12,7 +12,7 @@ const EPW_MAPPED = (
     (33, :albedo, identity),                     # dimensionless
 )
 
-"""Names for the data fields we do not map, so they can be kept in `extra`."""
+"""Keys for the remaining data fields, under which they are kept in `extra`."""
 const EPW_UNMAPPED = Dict(
     6 => :data_source_and_uncertainty_flags,
     8 => :dew_point_temperature,
@@ -62,17 +62,14 @@ end
 
 Read an EnergyPlus Weather file.
 
-Eight header lines precede comma-separated data rows of 35 fields. Coordinates,
-elevation, UTC offset and the record interval all come from that header, so the
-reader never asks the caller to restate what the file already says. Timestamps
-are converted to UTC using the offset the header declares. EPW is written in local *standard* time, so a
-file spanning a daylight-saving transition still yields uniform UTC.
+Coordinates, elevation, UTC offset and the record interval come from the eight
+header lines. EPW is written in local *standard* time, so converting with the
+declared offset yields uniform UTC across a daylight-saving transition.
+Irradiance is scaled from Wh/m^2 per record to W/m^2.
 
-Nothing is discarded: the seven non-`LOCATION` header lines and every data field
-without a canonical name are kept in `meta.extra`.
-
-Parsing never rejects. A file with duplicate or missing records is returned as
-found. Use [`validate`](@ref) to learn about it.
+The seven non-`LOCATION` header lines and every unmapped data field are kept in
+`meta.extra`. A file with duplicate or missing records is returned as found, so
+use [`validate`](@ref) to inspect it.
 
 `coerce_year` rewrites every year field before timestamps are built, for
 TMY-style files that stitch months from different years. The originals are kept

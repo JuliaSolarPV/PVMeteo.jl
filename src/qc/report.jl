@@ -5,9 +5,9 @@ const SEVERITIES = (:info, :warn, :error)
 
 One quality control finding.
 
-`indices` are positions in the series. `column` names the affected column, or is
-`nothing` for a finding about the time axis itself, such as a duplicate timestamp.
-Severity is one of `:info`, `:warn` or `:error`.
+`indices` are positions in the series. `column` names the affected column, and is
+`nothing` for a finding about the time axis, such as a duplicate timestamp.
+`severity` is `:info`, `:warn` or `:error`.
 """
 struct QCFlag
     check::Symbol
@@ -79,11 +79,9 @@ const APPLY_POLICIES = (:mask, :interpolate, :drop)
 A copy of `md` with the findings in `report` acted on.
 
 `:mask` writes `NaN` at the flagged indices of the column each flag names, for
-flags at or above `severity`. Flags that name no column describe the time axis and
-are left alone, because a duplicate timestamp says nothing about the values
-recorded at it.
+flags at or above `severity`.
 
-`:interpolate` and `:drop` need the resampling machinery and are not available yet.
+`:interpolate` and `:drop` arrive with the resampling work.
 """
 function apply(
     md::MeteoData{T},

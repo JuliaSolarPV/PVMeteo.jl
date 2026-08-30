@@ -4,12 +4,11 @@
 
 Run every quality control check over `md` and collect the findings.
 
-`md` is never modified. Use [`apply`](@ref) to act on the report.
+`validate` reads `md` and returns a report. Use [`apply`](@ref) to act on it.
 
 The timestamp and constant-run checks always run. The BSRN limits and the closure
-test need the cosine of the solar zenith angle at each record, so they run only
-when `cosz` is given. Without it the report carries an `:info` flag
-`:skipped_needs_cosz`, so a clean report is never mistaken for a complete one.
+test run when `cosz`, the cosine of the solar zenith angle at each record, is
+given. Otherwise the report carries an `:info` flag `:skipped_needs_cosz`.
 """
 function validate(
     md::MeteoData;

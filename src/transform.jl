@@ -52,14 +52,12 @@ end
 
 The records in the half-open interval `[t0, t1)`.
 
-The columns are copied, so writes to the result do not reach the source.
-`meta.content_hash` is carried over unchanged, because it identifies the bytes the
-data was parsed from. The result records that `subset` ran, and that is what says
-the data was narrowed.
+The columns are copied, so the result owns its values. `meta.content_hash` carries
+over, since it identifies the bytes the data was parsed from, and the result
+records that `subset` ran.
 
-A range that selects nothing throws rather than returning an empty `MeteoData`.
-The search assumes the timestamps are sorted, so run [`validate`](@ref) first if
-the source might be out of order.
+A range that selects nothing throws. The search assumes sorted timestamps, so run
+[`validate`](@ref) first when the source might be out of order.
 """
 function subset(md::MeteoData, t0::DateTime, t1::DateTime)
     t1 > t0 || throw(ArgumentError("t1 $t1 must be after t0 $t0"))
