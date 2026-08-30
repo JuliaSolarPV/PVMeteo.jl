@@ -64,8 +64,9 @@ No source carries all of them.
 | `:albedo` | surface albedo | dimensionless |
 | `:precipitable_water` | precipitable water | cm |
 
-Anything a reader cannot map to one of these is kept in `md.meta.extra`. The
-timestamps live in `md.time` and are not a column.
+Anything a reader cannot map to one of these is kept in `md.meta.extra`.
+Timestamps are held separately in `md.time`. It is the first column of the table,
+and `datacolumns` and `hascolumn` cover the canonical data columns only.
 
 ```julia
 julia> datacolumns(md)
