@@ -81,7 +81,7 @@ julia> round(sum(ghi(md)[1:24]) / 1000, digits = 2)   # kWh/m2 on day one
 7.02
 ```
 
-Three calls report column names, and they answer different questions.
+What each call returns:
 
 | Call | Returns | `time` included |
 |:---|:---|:---|
