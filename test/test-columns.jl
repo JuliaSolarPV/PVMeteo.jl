@@ -34,9 +34,9 @@ end
     )
 end
 
-@testitem "columns reports names in order" tags=[:unit, :fast] setup=[ColumnFixture] begin
+@testitem "datacolumns reports names in order" tags=[:unit, :fast] setup=[ColumnFixture] begin
     md = tiny((; ghi = [1.0, 2.0], temp_air = [3.0, 4.0]))
-    @test PVMeteo.columns(md) === (:ghi, :temp_air)
+    @test PVMeteo.datacolumns(md) === (:ghi, :temp_air)
 end
 
 @testitem "hascolumn answers both ways" tags=[:unit, :fast] setup=[ColumnFixture] begin

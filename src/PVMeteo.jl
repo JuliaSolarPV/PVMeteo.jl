@@ -16,7 +16,7 @@ include("qc/limits.jl")
 
 export IntervalLabel, LeftLabeled, RightLabeled, CenterLabeled
 export MeteoMeta, MeteoData
-export columns, hascolumn
+export datacolumns, hascolumn
 export ghi, dni, dhi, temp_air, wind_speed, wind_direction
 export pressure, relative_humidity, albedo, precipitable_water
 export read_epw, read_tmy3

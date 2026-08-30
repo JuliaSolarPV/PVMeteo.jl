@@ -1,8 +1,8 @@
 # PVMeteo.jl
 
 [![Test workflow status](https://github.com/JuliaSolarPV/PVMeteo.jl/actions/workflows/Test.yml/badge.svg?branch=main)](https://github.com/JuliaSolarPV/PVMeteo.jl/actions/workflows/Test.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/JuliaSolarPV/PVMeteo.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaSolarPV/PVMeteo.jl)
 [![Lint workflow Status](https://github.com/JuliaSolarPV/PVMeteo.jl/actions/workflows/Lint.yml/badge.svg?branch=main)](https://github.com/JuliaSolarPV/PVMeteo.jl/actions/workflows/Lint.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/JuliaSolarPV/PVMeteo.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaSolarPV/PVMeteo.jl)
 
 `PVMeteo.jl` reads, validates and supplies meteorological time series data to support
 simulating of solar photovoltaic systems.
@@ -49,7 +49,7 @@ julia> t.meta.utc_offset, t.time[1], first(pressure(t))
 ## Columns
 
 ```julia
-julia> columns(md)
+julia> datacolumns(md)
 (:temp_air, :relative_humidity, :pressure, :ghi, :dni, :dhi, :wind_direction, :wind_speed, :precipitable_water, :albedo)
 
 julia> hascolumn(md, :dni), hascolumn(md, :snow_depth)
@@ -96,13 +96,34 @@ true
 
 ## Tables.jl interface
 
-`MeteoData` implements the `Tables.jl` interface, with `time` always as the first column.
+`MeteoData` is a column-oriented `Tables.jl` source. Four methods are implemented.
+
+| Method | Result |
+|:---|:---|
+| `Tables.istable` | `true` |
+| `Tables.columnaccess` | `true` |
+| `Tables.columns` | a `NamedTuple` of the columns, `time` first |
+| `Tables.schema` | the names and types, without touching the data |
+
+`Tables.columns(md)` returns the column vectors and includes `time`. The package's
+own `datacolumns(md)` returns just the names of the data columns.
 
 ```julia
 julia> using Tables
 
-julia> Tables.schema(md).names
+julia> keys(Tables.columns(md))
 (:time, :temp_air, :relative_humidity, :pressure, :ghi, :dni, :dhi, :wind_direction, :wind_speed, :precipitable_water, :albedo)
+
+julia> Tables.columns(md).ghi[13]
+739.0
+
+julia> Tables.schema(md)
+Tables.Schema:
+ :time                Dates.DateTime
+ :temp_air            Float64
+ :relative_humidity   Float64
+ :ghi                 Float64
+ ⋮
 ```
 
 This means you can also use `MeteoData` with any package that supports the `Tables.jl` interface, such as `DataFrames.jl`.

@@ -16,7 +16,7 @@
             retrieved = DateTime(2026, 1, 1),
             content_hash = UInt64(0),
         )
-        t = collect(start:interval:(start + interval * (n - 1)))
+        t = collect(start:interval:(start+interval*(n-1)))
         return PVMeteo.MeteoData(t, nt, meta)
     end
 

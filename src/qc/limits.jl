@@ -58,9 +58,8 @@ more often means drift or a soiled dome.
 """
 function check_limits(md::MeteoData, cosz, limits::BSRN = BSRN())
     n = length(md.time)
-    length(cosz) == n || throw(
-        DimensionMismatch("cosz has $(length(cosz)) values for $n records"),
-    )
+    length(cosz) == n ||
+        throw(DimensionMismatch("cosz has $(length(cosz)) values for $n records"))
 
     flags = QCFlag[]
     doys = Dates.dayofyear.(md.time)
@@ -69,7 +68,7 @@ function check_limits(md::MeteoData, cosz, limits::BSRN = BSRN())
         values = md.data[name]
         impossible = Int[]
         unusual = Int[]
-        for i in 1:n
+        for i = 1:n
             S = extraterrestrial_normal(doys[i], limits.solar_constant)
             mu = max(float(cosz[i]), 0.0)
             v = float(values[i])
@@ -117,7 +116,7 @@ function check_constant_runs(md::MeteoData; minimum_run::Integer = 6)
         throw(ArgumentError("minimum_run must be at least 2, got $minimum_run"))
 
     flags = QCFlag[]
-    for name in columns(md)
+    for name in datacolumns(md)
         values = md.data[name]
         n = length(values)
         n >= minimum_run || continue
@@ -125,12 +124,12 @@ function check_constant_runs(md::MeteoData; minimum_run::Integer = 6)
 
         stuck = Int[]
         start = 1
-        for i in 2:(n + 1)
+        for i = 2:(n+1)
             same = i <= n && values[i] == values[start]
             same && continue
             len = i - start
             if len >= minimum_run && !(exempt_zero && iszero(values[start]))
-                append!(stuck, start:(i - 1))
+                append!(stuck, start:(i-1))
             end
             start = i
         end
