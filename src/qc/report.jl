@@ -16,16 +16,15 @@ struct QCFlag
     detail::String
     column::Union{Nothing,Symbol}
 
-    function QCFlag(check, indices, severity, detail, column = nothing)
-        severity in SEVERITIES ||
-            throw(ArgumentError("severity :$severity must be one of $(SEVERITIES)"))
-        return new(
-            Symbol(check),
-            collect(Int, indices),
-            Symbol(severity),
-            String(detail),
-            column,
-        )
+    function QCFlag(
+        check::Symbol,
+        indices::AbstractVector{<:Integer},
+        severity::Symbol,
+        detail::AbstractString,
+        column::Union{Nothing,Symbol} = nothing,
+    )
+        severity_rank(severity)
+        return new(check, collect(Int, indices), severity, String(detail), column)
     end
 end
 
@@ -37,9 +36,16 @@ The findings of a [`validate`](@ref) run over `n_records` records.
 struct QCReport
     flags::Vector{QCFlag}
     n_records::Int
+
+    QCReport(flags::Vector{QCFlag}, n_records::Integer) = new(flags, Int(n_records))
 end
 
-severity_rank(s::Symbol) = findfirst(==(s), SEVERITIES)
+"""Where a severity sits in [`SEVERITIES`](@ref). Throws on an unknown one."""
+function severity_rank(s::Symbol)
+    rank = findfirst(==(s), SEVERITIES)
+    rank === nothing && throw(ArgumentError("severity :$s must be one of $(SEVERITIES)"))
+    return rank
+end
 
 function Base.show(io::IO, ::MIME"text/plain", r::QCReport)
     print(io, "QCReport: ", r.n_records, " records")

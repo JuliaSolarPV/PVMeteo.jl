@@ -62,9 +62,11 @@ These are the invariants most likely to be violated by an otherwise reasonable c
 
 - **Layering.** PVMeteo is the data layer *beneath* the PV model chain. It must never import a chain
   type (e.g. `ChainSpec`). Anything requiring chain knowledge belongs in the consumer, not here.
-- **Core dependencies are `Dates`, `Tables`, `CSV` only.** `HTTP`, `TimeZones`, `Parquet2`, `Arrow`, and
-  `Makie` all go in package extensions under `ext/`. Keeping `TimeZones` out of the core is deliberate —
-  users passing a plain `DateTime` should not pull TZJData.
+- **Core dependencies are `Dates`, `Tables` and `SHA` only.** The design lists `CSV` too, but the EPW
+  and TMY3 readers parse by hand and Aqua fails on the unused dep, so it was dropped. It comes back
+  with the generic CSV reader. `HTTP`, `TimeZones`, `Parquet2`, `Arrow`, and `Makie` all go in package
+  extensions under `ext/`. Keeping `TimeZones` out of the core is deliberate — users passing a plain
+  `DateTime` should not pull TZJData.
 - **`MeteoData` holds a `NamedTuple` of vectors, not a `DataFrame`,** so the element type `T` stays
   generic (`Float32`, `Dual`, `Particles`). Interop comes from implementing the Tables.jl interface.
 - **Timestamps are UTC internally, always.** Local time is a boundary/presentation concern.

@@ -2,8 +2,8 @@
 Hash of the raw bytes a `MeteoData` was parsed from. Uses SHA-256, which is stable
 across Julia versions.
 """
-content_hash(bytes::AbstractVector{UInt8}) =
-    first(reinterpret(UInt64, SHA.sha256(collect(bytes))))
+content_hash(bytes::Vector{UInt8}) = first(reinterpret(UInt64, SHA.sha256(bytes)))
+content_hash(bytes::AbstractVector{UInt8}) = content_hash(Vector{UInt8}(bytes))
 content_hash(path::AbstractString) = content_hash(read(path))
 
 """

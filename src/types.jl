@@ -59,22 +59,54 @@ struct MeteoMeta{L<:IntervalLabel,P<:Period}
     lineage::Vector{Symbol}
     station::Union{Nothing,String}
     extra::Dict{Symbol,Any}
+
+    function MeteoMeta(
+        latitude::Float64,
+        longitude::Float64,
+        altitude::Float64,
+        utc_offset::Minute,
+        label::L,
+        interval::P,
+        source::Symbol,
+        origin::String,
+        retrieved::DateTime,
+        content_hash::UInt64,
+        lineage::Vector{Symbol},
+        station::Union{Nothing,String},
+        extra::Dict{Symbol,Any},
+    ) where {L<:IntervalLabel,P<:Period}
+        return new{L,P}(
+            latitude,
+            longitude,
+            altitude,
+            utc_offset,
+            label,
+            interval,
+            source,
+            origin,
+            retrieved,
+            content_hash,
+            lineage,
+            station,
+            extra,
+        )
+    end
 end
 
 function MeteoMeta(;
-    latitude,
-    longitude,
-    altitude,
-    utc_offset,
-    label,
-    interval,
-    source,
-    origin,
-    retrieved,
-    content_hash,
-    lineage = Symbol[],
-    station = nothing,
-    extra = Dict{Symbol,Any}(),
+    latitude::Real,
+    longitude::Real,
+    altitude::Real,
+    utc_offset::Period,
+    label::IntervalLabel,
+    interval::Period,
+    source::Union{Symbol,AbstractString},
+    origin::AbstractString,
+    retrieved::DateTime,
+    content_hash::Integer,
+    lineage::Vector{Symbol} = Symbol[],
+    station::Union{Nothing,AbstractString} = nothing,
+    extra::AbstractDict{Symbol} = Dict{Symbol,Any}(),
 )
     -90 <= latitude <= 90 || throw(ArgumentError("latitude $latitude is outside [-90, 90]"))
     -180 <= longitude <= 360 ||
@@ -91,8 +123,8 @@ function MeteoMeta(;
         retrieved,
         UInt64(content_hash),
         lineage,
-        station,
-        extra,
+        station === nothing ? nothing : String(station),
+        convert(Dict{Symbol,Any}, extra),
     )
 end
 
@@ -117,12 +149,11 @@ struct MeteoData{T,N,L<:IntervalLabel,P<:Period,C<:NamedTuple{N,<:Tuple{Vararg{V
     data::C
     meta::MeteoMeta{L,P}
 
-    function MeteoData(
+    function MeteoData{T,N,L,P,C}(
         time::Vector{DateTime},
         data::C,
         meta::MeteoMeta{L,P},
     ) where {T,N,L<:IntervalLabel,P<:Period,C<:NamedTuple{N,<:Tuple{Vararg{Vector{T}}}}}
-        isempty(N) && throw(ArgumentError("MeteoData needs at least one data column"))
         n = length(time)
         for (name, v) in pairs(data)
             length(v) == n || throw(
@@ -133,6 +164,19 @@ struct MeteoData{T,N,L<:IntervalLabel,P<:Period,C<:NamedTuple{N,<:Tuple{Vararg{V
         end
         return new{T,N,L,P,C}(time, data, meta)
     end
+end
+
+"""The element type shared by a NamedTuple of column vectors."""
+column_eltype(::Type{<:NamedTuple{N,V}}) where {N,V} = eltype(eltype(V))
+
+function MeteoData(
+    time::Vector{DateTime},
+    data::NamedTuple{N},
+    meta::MeteoMeta{L,P},
+) where {N,L<:IntervalLabel,P<:Period}
+    isempty(N) && throw(ArgumentError("MeteoData needs at least one data column"))
+    C = typeof(data)
+    return MeteoData{column_eltype(C),N,L,P,C}(time, data, meta)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", md::MeteoData{T,N}) where {T,N}

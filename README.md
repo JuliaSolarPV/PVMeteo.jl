@@ -133,6 +133,83 @@ julia> md.meta.label, typeof(md).parameters[3]
 (RightLabeled(), RightLabeled)
 ```
 
+## Transforms
+
+`relabel` moves the timestamps to another convention. The values are untouched, because
+relabelling says where an interval sits, not what was measured over it.
+
+```julia
+julia> left = relabel(md, LeftLabeled());
+
+julia> md.time[1], left.time[1]
+(DateTime("2020-06-20T00:00:00"), DateTime("2020-06-19T23:00:00"))
+```
+
+`subset` narrows to the half-open range `[t0, t1)` and copies the columns.
+
+```julia
+julia> day = subset(left, DateTime(2020, 6, 21), DateTime(2020, 6, 22))
+MeteoData{Float64}: 24 records, 2020-06-21T00:00:00 to 2020-06-21T23:00:00 UTC
+  source:   epw (/data/NLD_De-Bilt.epw)
+  interval: 1 hour, LeftLabeled
+  columns:  temp_air, relative_humidity, pressure, ghi, dni, dhi, wind_direction, wind_speed, precipitable_water, albedo
+  lineage:  relabel -> subset
+```
+
+Every transform returns a new object and appends to `meta.lineage`. Together with
+`meta.content_hash`, which identifies the bytes the data was read from, the lineage is
+what reproduces a result.
+
+```julia
+julia> day.meta.lineage
+2-element Vector{Symbol}:
+ :relabel
+ :subset
+```
+
+## Quality control
+
+`validate` inspects the data and returns a `QCReport`. It never modifies its argument.
+
+```julia
+julia> validate(md)
+QCReport: 72 records, 8 flags
+  warn  constant_run on :pressure: 72 records. pressure holds the same value for 6 or more records
+  ⋮
+  info  skipped_needs_cosz: 0 records. the limit and closure checks need cos(zenith) at each record. Pass cosz to run them.
+```
+
+The BSRN limit checks and the closure test both need the cosine of the solar zenith angle
+at each record. PVMeteo does not compute solar position, so pass a vector of `cos(z)` in.
+Without it those two checks are skipped and the report says so, as the `info` line above
+records.
+
+```julia
+julia> suspect = read_epw("suspect.epw");
+
+julia> report = validate(suspect; cosz)
+QCReport: 48 records, 8 flags
+  error closure on :ghi: 6 records. ghi differs from dhi + dni * cos(zenith) by more than the tolerance
+  ⋮
+```
+
+`apply` acts on a report. The `:mask` policy writes `NaN` at the flagged records of the
+column each flag names.
+
+```julia
+julia> masked = apply(suspect, report);
+
+julia> ghi(masked)[12:14]
+3-element Vector{Float64}:
+ NaN
+ NaN
+ NaN
+
+julia> masked.meta.lineage
+1-element Vector{Symbol}:
+ :qc_mask
+```
+
 ## Element type
 
 The element type is generic. `Float32`, `BigFloat`, and even dual numbers or uncertainty

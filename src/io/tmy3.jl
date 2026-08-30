@@ -22,6 +22,8 @@ const TMY3_MAPPED = (
     ("Alb (unitless)", :albedo, identity),
 )
 
+split_fields(row::String) = strip.(split(row, ','))
+
 """
     read_tmy3(path; T = Float64, coerce_year = nothing) -> MeteoData{T}
 
@@ -59,12 +61,12 @@ function read_tmy3(path::AbstractString; T::Type = Float64, coerce_year = nothin
     longitude = parse(Float64, station_fields[6])
     altitude = parse(Float64, station_fields[7])
 
-    header = strip.(split(lines[2], ','))
+    header = split_fields(lines[2])
     index = Dict(name => i for (i, name) in enumerate(header))
 
     rows = @view lines[3:end]
     n = length(rows)
-    fields = [strip.(split(row, ',')) for row in rows]
+    fields = map(split_fields, rows)
     for (i, f) in enumerate(fields)
         length(f) == length(header) || throw(
             ArgumentError(
