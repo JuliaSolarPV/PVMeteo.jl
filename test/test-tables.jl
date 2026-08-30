@@ -54,3 +54,10 @@ end
     @test first(rows).ghi == 1.0
     @test first(rows).time == md.time[1]
 end
+
+@testitem "columnnames works on the table" tags=[:unit, :fast] setup=[TableFixture] begin
+    md = tabular()
+    @test Tables.columnnames(md) == (:time, :ghi, :temp_air)
+    @test Tables.columnnames(md) == Tables.columnnames(Tables.columns(md))
+    @test Tables.columnnames(md) == Tables.schema(md).names
+end

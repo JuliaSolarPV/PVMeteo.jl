@@ -116,7 +116,7 @@ function check_constant_runs(md::MeteoData; minimum_run::Integer = 6)
         throw(ArgumentError("minimum_run must be at least 2, got $minimum_run"))
 
     flags = QCFlag[]
-    for name in datacolumns(md)
+    for name in keys(md.data)
         values = md.data[name]
         n = length(values)
         n >= minimum_run || continue

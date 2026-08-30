@@ -34,15 +34,18 @@ end
     )
 end
 
-@testitem "datacolumns reports names in order" tags=[:unit, :fast] setup=[ColumnFixture] begin
+@testitem "columnnames reports names in order" tags=[:unit, :fast] setup=[ColumnFixture] begin
+    using Tables
     md = tiny((; ghi = [1.0, 2.0], temp_air = [3.0, 4.0]))
-    @test PVMeteo.datacolumns(md) === (:ghi, :temp_air)
+    @test Tables.columnnames(md) === (:time, :ghi, :temp_air)
 end
 
 @testitem "hascolumn answers both ways" tags=[:unit, :fast] setup=[ColumnFixture] begin
     md = tiny((; ghi = [1.0, 2.0]))
     @test PVMeteo.hascolumn(md, :ghi)
     @test !PVMeteo.hascolumn(md, :dni)
+    # time is a column, reachable as md.time rather than through an accessor.
+    @test PVMeteo.hascolumn(md, :time)
 end
 
 @testitem "accessors return aliasing views" tags=[:unit, :fast] setup=[ColumnFixture] begin
@@ -72,4 +75,12 @@ end
         md = tiny(NamedTuple{(name,)}(([1.0, 2.0],)))
         @test getfield(PVMeteo, name)(md) == [1.0, 2.0]
     end
+end
+
+@testitem "time has an accessor too" tags=[:unit, :fast] setup=[ColumnFixture] begin
+    md = tiny((; ghi = [1.0, 2.0]))
+    @test time(md) == md.time
+    @test PVMeteo.hascolumn(md, :time)
+    # Base.time() is untouched.
+    @test time() > 0
 end

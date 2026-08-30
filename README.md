@@ -65,14 +65,15 @@ Readers map each source onto a fixed set of canonical columns, always in SI unit
 
 Anything a reader cannot map to one of these is kept in `md.meta.extra`.
 
-`md.time` is the one column guaranteed to exist. It is always present, always in
-UTC, and always the first column of the table. Every canonical column above is
-optional, so `datacolumns` and `hascolumn` report only the ones a given source
-carries.
+`time` is the one column guaranteed to exist. It is always present, always in UTC,
+and always the first column of the table. Every canonical column above is optional,
+so `hascolumn` reports what a given source actually carries.
 
 ```julia
-julia> datacolumns(md)
-(:temp_air, :relative_humidity, :pressure, :ghi, :dni, :dhi, :wind_direction, :wind_speed, :precipitable_water, :albedo)
+julia> using Tables
+
+julia> Tables.columnnames(md)
+(:time, :temp_air, :relative_humidity, :pressure, :ghi, :dni, :dhi, :wind_direction, :wind_speed, :precipitable_water, :albedo)
 
 julia> hascolumn(md, :dni), hascolumn(md, :snow_depth)
 (true, false)
@@ -81,15 +82,7 @@ julia> round(sum(ghi(md)[1:24]) / 1000, digits = 2)   # kWh/m2 on day one
 7.02
 ```
 
-What each call returns:
-
-| Call | Returns | `time` included |
-|:---|:---|:---|
-| `datacolumns(md)` | names of the data columns | no |
-| `Tables.columnnames(Tables.columns(md))` | names | yes |
-| `Tables.columns(md)` | the column vectors | yes |
-
-Accessors return views. A missing column raises an error listing the available columns.
+Every column has an accessor, `time` included, and they return views. A missing column raises an error listing the available columns.
 
 ```julia
 julia> dni(ghi_only)
@@ -126,13 +119,14 @@ true
 
 ## Tables.jl interface
 
-`MeteoData` is a column-oriented `Tables.jl` source. Four methods are implemented.
+`MeteoData` is a column-oriented `Tables.jl` source. Five methods are implemented.
 
 | Method | Result |
 |:---|:---|
 | `Tables.istable` | `true` |
 | `Tables.columnaccess` | `true` |
 | `Tables.columns` | a `NamedTuple` of the columns, `time` first |
+| `Tables.columnnames` | the column names, `time` first |
 | `Tables.schema` | the names and types, without touching the data |
 
 ```julia

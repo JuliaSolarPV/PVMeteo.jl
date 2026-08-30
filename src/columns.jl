@@ -40,24 +40,22 @@ and are zero every night, so several checks treat them together.
 const IRRADIANCE = (:ghi, :dni, :dhi)
 
 """
-    datacolumns(md::MeteoData) -> Tuple{Vararg{Symbol}}
-
-The names of the data columns carried by `md`, in storage order.
-
-`time` is not among them. `Tables.columns` and `Tables.columnnames` are separate
-functions that report the time axis as a column too.
-"""
-datacolumns(::MeteoData{T,N}) where {T,N} = N
-
-"""
     hascolumn(md::MeteoData, name::Symbol) -> Bool
 
-Whether `md` carries a column called `name`.
+Whether `md` carries a column called `name`, including `:time`.
 
 This is the hook for trait validation upstream. A model stage that needs beam
 components can check for them before it runs.
 """
-hascolumn(md::MeteoData, name::Symbol) = name in datacolumns(md)
+hascolumn(md::MeteoData, name::Symbol) = name in Tables.columnnames(md)
+
+"""
+    time(md::MeteoData)
+
+A view of the timestamps, always UTC. This is a method on `Base.time`, so it needs
+no import and does not shadow `time()`.
+"""
+Base.time(md::MeteoData) = @view md.time[:]
 
 for name in CANONICAL
     @eval begin
@@ -70,7 +68,7 @@ for name in CANONICAL
             hascolumn(md, $(QuoteNode(name))) || throw(
                 ArgumentError(
                     "this MeteoData has no :$($(QuoteNode(name))) column. " *
-                    "Available columns: $(datacolumns(md))",
+                    "Available columns: $(keys(md.data))",
                 ),
             )
             return @view md.data[$(QuoteNode(name))][:]
