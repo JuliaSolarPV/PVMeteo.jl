@@ -177,13 +177,16 @@ function Base.show(io::IO, ::MIME"text/plain", md::MeteoData{T,N}) where {T,N}
     n = length(md.time)
     print(io, "MeteoData{$T}: $n records")
     if n > 0
-        print(io, ", ", first(md.time), " to ", last(md.time), " UTC")
+        earliest, latest = extrema(md.time)
+        print(io, ", ", earliest, " to ", latest, " UTC")
     end
     println(io)
     println(io, "  source:   ", md.meta.source, " (", md.meta.origin, ")")
     println(io, "  interval: ", md.meta.interval, ", ", nameof(typeof(md.meta.label)))
     println(io, "  columns:  ", join(N, ", "))
     isempty(md.meta.history) || println(io, "  history:  ", join(md.meta.history, " -> "))
+    issorted(md.time) ||
+        println(io, "  warning:  timestamps are out of order, run validate")
     return nothing
 end
 

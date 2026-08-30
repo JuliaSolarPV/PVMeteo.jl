@@ -72,4 +72,14 @@ end
     @test occursin("temp_air", s)
     @test occursin("test", s)
     @test !occursin("[1.0, 2.0, 3.0]", s)  # no data dump
+    @test !occursin("out of order", s)
+end
+
+@testitem "show spans an unsorted axis" tags=[:unit, :fast] setup=[MetaFixture] begin
+    using Dates
+    shuffled = [DateTime(2026, 1, 1, 2), DateTime(2026, 1, 1), DateTime(2026, 1, 1, 1)]
+    md = PVMeteo.MeteoData(shuffled, (; ghi = [1.0, 2.0, 3.0]), make_meta())
+    s = sprint(show, MIME("text/plain"), md)
+    @test occursin("2026-01-01T00:00:00 to 2026-01-01T02:00:00", s)
+    @test occursin("out of order", s)
 end
