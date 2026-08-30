@@ -7,16 +7,17 @@ content_hash(bytes::AbstractVector{UInt8}) =
 content_hash(path::AbstractString) = content_hash(read(path))
 
 """
-A copy of `meta` with `op` appended to its lineage. `extra` is copied, so a write
-through one object cannot alter another derived from it.
+A copy of `meta` with `op` appended to its lineage, and optionally a new interval
+label. `extra` is copied, so a write through one object cannot alter another
+derived from it.
 """
-function with_lineage(meta::MeteoMeta, op::Symbol)
+function with_lineage(meta::MeteoMeta, op::Symbol; label::IntervalLabel = meta.label)
     return MeteoMeta(;
         latitude = meta.latitude,
         longitude = meta.longitude,
         altitude = meta.altitude,
         utc_offset = meta.utc_offset,
-        label = meta.label,
+        label = label,
         interval = meta.interval,
         source = meta.source,
         origin = meta.origin,

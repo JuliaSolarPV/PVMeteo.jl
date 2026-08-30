@@ -15,6 +15,7 @@ include("qc/timestamps.jl")
 include("qc/limits.jl")
 include("qc/closure.jl")
 include("qc/validate.jl")
+include("transform.jl")
 
 export IntervalLabel, LeftLabeled, RightLabeled, CenterLabeled
 export MeteoMeta, MeteoData
@@ -23,5 +24,6 @@ export ghi, dni, dhi, temp_air, wind_speed, wind_direction
 export pressure, relative_humidity, albedo, precipitable_water
 export read_epw, read_tmy3
 export QCFlag, QCReport, apply, BSRN, validate
+export relabel
 
 end
