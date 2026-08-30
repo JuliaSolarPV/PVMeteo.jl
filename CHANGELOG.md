@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning].
   extremely rare limits, and closure of GHI against DNI and DHI.
 - `apply`, which acts on a report. The `:mask` policy writes `NaN` at the flagged
   records.
-- `relabel` and `subset`, each returning a new object and appending to `meta.lineage`.
+- `relabel` and `subset`, each returning a new object and appending to `meta.history`.
 
 <!-- Links -->
 

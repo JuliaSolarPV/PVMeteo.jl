@@ -75,8 +75,8 @@ These are the invariants most likely to be violated by an otherwise reasonable c
 - **Units are SI, no `Unitful`** — enforced by documentation and tests.
 - **Parsing never rejects data.** Readers report what they found and stash unknown fields in
   `meta.extra`; `validate` returns a `QCReport` and never mutates.
-- **Every transform returns a new `MeteoData` and appends to `meta.lineage`.** Reproducibility is
-  `content_hash` + `lineage`, not the source path.
+- **Every transform returns a new `MeteoData` and appends to `meta.history`.** Reproducibility is
+  `content_hash` + `history`, not the source path.
 
 `pvmeteo-design.md` §11 gives the intended build order (types → EPW/TMY3 readers → timestamp and
 closure QC → `relabel`/`subset` → everything else) and §10 lists the invariants that tests must cover.

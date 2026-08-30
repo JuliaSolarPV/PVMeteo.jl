@@ -82,7 +82,7 @@ end
 @testitem "read_tmy3 hashes the source bytes" tags=[:unit, :fast] setup=[TMY3Fixture] begin
     a = PVMeteo.read_tmy3(fixture("minimal_tmy3.csv"))
     @test a.meta.content_hash == PVMeteo.content_hash(fixture("minimal_tmy3.csv"))
-    @test isempty(a.meta.lineage)
+    @test isempty(a.meta.history)
 end
 
 @testitem "read_tmy3 honours the element type" tags=[:unit, :fast] setup=[TMY3Fixture] begin

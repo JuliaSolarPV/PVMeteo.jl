@@ -43,12 +43,12 @@ end
     @test md.time[1] == DateTime(2020, 6, 20)
 end
 
-@testitem "subset records its lineage" tags=[:unit, :fast] setup=[SubsetFixture] begin
+@testitem "subset records its history" tags=[:unit, :fast] setup=[SubsetFixture] begin
     md = series()
     out = PVMeteo.subset(md, DateTime(2020, 6, 20), DateTime(2020, 6, 20, 3))
-    @test out.meta.lineage == [:subset]
+    @test out.meta.history == [:subset]
     @test out.meta.content_hash == md.meta.content_hash
-    @test isempty(md.meta.lineage)
+    @test isempty(md.meta.history)
 end
 
 @testitem "an empty range throws" tags=[:unit, :fast] setup=[SubsetFixture] begin
@@ -75,7 +75,7 @@ end
         DateTime(2020, 6, 20),
         DateTime(2020, 6, 21),
     )
-    @test out.meta.lineage == [:relabel, :subset]
+    @test out.meta.history == [:relabel, :subset]
     @test length(out.time) == 24
     @test out.meta.label === PVMeteo.LeftLabeled()
 end

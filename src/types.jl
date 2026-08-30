@@ -56,7 +56,7 @@ struct MeteoMeta{L<:IntervalLabel,P<:Period}
     origin::String
     retrieved::DateTime
     content_hash::UInt64
-    lineage::Vector{Symbol}
+    history::Vector{Symbol}
     station::Union{Nothing,String}
     extra::Dict{Symbol,Any}
 
@@ -71,7 +71,7 @@ struct MeteoMeta{L<:IntervalLabel,P<:Period}
         origin::String,
         retrieved::DateTime,
         content_hash::UInt64,
-        lineage::Vector{Symbol},
+        history::Vector{Symbol},
         station::Union{Nothing,String},
         extra::Dict{Symbol,Any},
     ) where {L<:IntervalLabel,P<:Period}
@@ -86,7 +86,7 @@ struct MeteoMeta{L<:IntervalLabel,P<:Period}
             origin,
             retrieved,
             content_hash,
-            lineage,
+            history,
             station,
             extra,
         )
@@ -104,7 +104,7 @@ function MeteoMeta(;
     origin::AbstractString,
     retrieved::DateTime,
     content_hash::Integer,
-    lineage::Vector{Symbol} = Symbol[],
+    history::Vector{Symbol} = Symbol[],
     station::Union{Nothing,AbstractString} = nothing,
     extra::AbstractDict{Symbol} = Dict{Symbol,Any}(),
 )
@@ -122,7 +122,7 @@ function MeteoMeta(;
         String(origin),
         retrieved,
         UInt64(content_hash),
-        lineage,
+        history,
         station === nothing ? nothing : String(station),
         convert(Dict{Symbol,Any}, extra),
     )
@@ -189,7 +189,7 @@ function Base.show(io::IO, ::MIME"text/plain", md::MeteoData{T,N}) where {T,N}
     println(io, "  source:   ", md.meta.source, " (", md.meta.origin, ")")
     println(io, "  interval: ", md.meta.interval, ", ", nameof(typeof(md.meta.label)))
     println(io, "  columns:  ", join(N, ", "))
-    isempty(md.meta.lineage) || println(io, "  lineage:  ", join(md.meta.lineage, " -> "))
+    isempty(md.meta.history) || println(io, "  history:  ", join(md.meta.history, " -> "))
     return nothing
 end
 

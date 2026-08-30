@@ -111,5 +111,5 @@ end
     PVMeteo.validate(md; cosz = closure_cosz())
     @test md.time == before.time
     @test md.data == before.data
-    @test md.meta.lineage == before.meta.lineage
+    @test md.meta.history == before.meta.history
 end

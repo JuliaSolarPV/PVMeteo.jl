@@ -27,12 +27,12 @@ untouched and the returned object shares them, because relabelling says where an
 interval sits, not what was measured over it. Resampling to a different interval is
 a separate operation.
 
-`meta.label` becomes `label` and `:relabel` is appended to `meta.lineage`.
+`meta.label` becomes `label`, and the result records that `relabel` ran.
 """
 function relabel(md::MeteoData, label::IntervalLabel)
     interval = md.meta.interval
     shift = label_offset(label, interval) - label_offset(md.meta.label, interval)
-    meta = with_lineage(md.meta, :relabel; label = label)
+    meta = with_history(md.meta, :relabel; label = label)
     return MeteoData(md.time .+ shift, md.data, meta)
 end
 
@@ -43,8 +43,8 @@ The records in the half-open interval `[t0, t1)`.
 
 The columns are copied, so writes to the result do not reach the source.
 `meta.content_hash` is carried over unchanged, because it identifies the bytes the
-data was parsed from. `:subset` is appended to `meta.lineage`, and that is what
-records the narrowing.
+data was parsed from. The result records that `subset` ran, and that is what says
+the data was narrowed.
 
 A range that selects nothing throws rather than returning an empty `MeteoData`.
 The search assumes the timestamps are sorted, so run [`validate`](@ref) first if
@@ -64,6 +64,6 @@ function subset(md::MeteoData, t0::DateTime, t1::DateTime)
     return MeteoData(
         md.time[keep],
         map(v -> v[keep], md.data),
-        with_lineage(md.meta, :subset),
+        with_history(md.meta, :subset),
     )
 end

@@ -65,13 +65,13 @@ end
     r = PVMeteo.QCReport([flag(:physical_limit, [2], :error, :ghi)], 5)
     PVMeteo.apply(md, r)
     @test md.data.ghi == [1.0, 2.0, 3.0, 4.0, 5.0]
-    @test isempty(md.meta.lineage)
+    @test isempty(md.meta.history)
 end
 
-@testitem "mask records itself in lineage" tags=[:unit, :fast] setup=[QCFixture] begin
+@testitem "mask records itself in history" tags=[:unit, :fast] setup=[QCFixture] begin
     md = sample()
     r = PVMeteo.QCReport([flag(:physical_limit, [2], :error, :ghi)], 5)
-    @test PVMeteo.apply(md, r).meta.lineage == [:qc_mask]
+    @test PVMeteo.apply(md, r).meta.history == [:qc_mask]
 end
 
 @testitem "mask skips flags with no column" tags=[:unit, :fast] setup=[QCFixture] begin

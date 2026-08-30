@@ -100,7 +100,7 @@ end
     @test a.meta.content_hash == PVMeteo.content_hash(fixture("minimal.epw"))
     c = PVMeteo.read_epw(fixture("closure_good.epw"))
     @test c.meta.content_hash != a.meta.content_hash
-    @test isempty(a.meta.lineage)
+    @test isempty(a.meta.history)
 end
 
 @testitem "read_epw honours the element type" tags=[:unit, :fast] setup=[EPWFixture] begin

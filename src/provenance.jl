@@ -7,11 +7,11 @@ content_hash(bytes::AbstractVector{UInt8}) = content_hash(Vector{UInt8}(bytes))
 content_hash(path::AbstractString) = content_hash(read(path))
 
 """
-A copy of `meta` with `op` appended to its lineage, and optionally a new interval
-label. `extra` is copied, so a write through one object cannot alter another
-derived from it.
+A copy of `meta` that records `op` as the operation just applied, optionally under a
+new interval label. `extra` is copied, so a write through one object cannot alter
+another derived from it.
 """
-function with_lineage(meta::MeteoMeta, op::Symbol; label::IntervalLabel = meta.label)
+function with_history(meta::MeteoMeta, op::Symbol; label::IntervalLabel = meta.label)
     return MeteoMeta(;
         latitude = meta.latitude,
         longitude = meta.longitude,
@@ -23,7 +23,7 @@ function with_lineage(meta::MeteoMeta, op::Symbol; label::IntervalLabel = meta.l
         origin = meta.origin,
         retrieved = meta.retrieved,
         content_hash = meta.content_hash,
-        lineage = vcat(meta.lineage, op),
+        history = vcat(meta.history, op),
         station = meta.station,
         extra = copy(meta.extra),
     )

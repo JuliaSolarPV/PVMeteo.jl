@@ -126,5 +126,5 @@ function apply(
     end
 
     data = NamedTuple{keys(md.data)}(Tuple(columns_[k] for k in keys(md.data)))
-    return MeteoData(copy(md.time), data, with_lineage(md.meta, :qc_mask))
+    return MeteoData(copy(md.time), data, with_history(md.meta, :qc_mask))
 end

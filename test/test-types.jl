@@ -14,7 +14,7 @@
     )
     @test isconcretetype(typeof(m))
     @test m isa PVMeteo.MeteoMeta{PVMeteo.RightLabeled,Hour}
-    @test m.lineage == Symbol[]
+    @test m.history == Symbol[]
     @test m.station === nothing
     @test isempty(m.extra)
 end

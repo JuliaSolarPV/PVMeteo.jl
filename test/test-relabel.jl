@@ -59,13 +59,13 @@ end
     @test out.meta.content_hash == md.meta.content_hash
 end
 
-@testitem "relabel records its lineage" tags=[:unit, :fast] setup=[RelabelFixture] begin
+@testitem "relabel records its history" tags=[:unit, :fast] setup=[RelabelFixture] begin
     md = series()
-    @test PVMeteo.relabel(md, PVMeteo.RightLabeled()).meta.lineage == [:relabel]
+    @test PVMeteo.relabel(md, PVMeteo.RightLabeled()).meta.history == [:relabel]
     same = PVMeteo.relabel(md, PVMeteo.LeftLabeled())
     @test same.time == md.time
-    @test same.meta.lineage == [:relabel]
-    @test isempty(md.meta.lineage)
+    @test same.meta.history == [:relabel]
+    @test isempty(md.meta.history)
 end
 
 @testitem "a quarter hour centres cleanly" tags=[:unit, :fast] setup=[RelabelFixture] begin
@@ -85,5 +85,5 @@ end
     out = PVMeteo.relabel(md, PVMeteo.LeftLabeled())
     @test out.time == md.time .- Hour(1)
     @test out.meta.label === PVMeteo.LeftLabeled()
-    @test out.meta.lineage == [:relabel]
+    @test out.meta.history == [:relabel]
 end

@@ -1,7 +1,7 @@
 @testsnippet ProvFixture begin
     using Dates
 
-    function meta_with(; lineage = Symbol[], extra = Dict{Symbol,Any}())
+    function meta_with(; history = Symbol[], extra = Dict{Symbol,Any}())
         return PVMeteo.MeteoMeta(;
             latitude = 52.0,
             longitude = 4.9,
@@ -13,7 +13,7 @@
             origin = "memory",
             retrieved = DateTime(2026, 1, 1),
             content_hash = UInt64(0),
-            lineage = lineage,
+            history = history,
             extra = extra,
         )
     end
@@ -46,19 +46,19 @@ end
     rm(path)
 end
 
-@testitem "with_lineage appends without mutating" tags=[:unit, :fast] setup=[ProvFixture] begin
+@testitem "with_history appends without mutating" tags=[:unit, :fast] setup=[ProvFixture] begin
     original = meta_with()
-    derived = PVMeteo.with_lineage(original, :relabel)
-    @test derived.lineage == [:relabel]
-    @test original.lineage == Symbol[]
-    twice = PVMeteo.with_lineage(derived, :subset)
-    @test twice.lineage == [:relabel, :subset]
-    @test derived.lineage == [:relabel]
+    derived = PVMeteo.with_history(original, :relabel)
+    @test derived.history == [:relabel]
+    @test original.history == Symbol[]
+    twice = PVMeteo.with_history(derived, :subset)
+    @test twice.history == [:relabel, :subset]
+    @test derived.history == [:relabel]
 end
 
-@testitem "with_lineage carries the rest across" tags=[:unit, :fast] setup=[ProvFixture] begin
+@testitem "with_history carries the rest across" tags=[:unit, :fast] setup=[ProvFixture] begin
     original = meta_with()
-    derived = PVMeteo.with_lineage(original, :relabel)
+    derived = PVMeteo.with_history(original, :relabel)
     for f in (
         :latitude,
         :longitude,
@@ -76,9 +76,9 @@ end
     end
 end
 
-@testitem "with_lineage copies extra" tags=[:unit, :fast] setup=[ProvFixture] begin
+@testitem "with_history copies extra" tags=[:unit, :fast] setup=[ProvFixture] begin
     original = meta_with(; extra = Dict{Symbol,Any}(:comments_1 => "hi"))
-    derived = PVMeteo.with_lineage(original, :subset)
+    derived = PVMeteo.with_history(original, :subset)
     @test derived.extra == original.extra
     derived.extra[:comments_1] = "changed"
     @test original.extra[:comments_1] == "hi"

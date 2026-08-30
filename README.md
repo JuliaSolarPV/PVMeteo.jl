@@ -153,15 +153,15 @@ MeteoData{Float64}: 24 records, 2020-06-21T00:00:00 to 2020-06-21T23:00:00 UTC
   source:   epw (/data/NLD_De-Bilt.epw)
   interval: 1 hour, LeftLabeled
   columns:  temp_air, relative_humidity, pressure, ghi, dni, dhi, wind_direction, wind_speed, precipitable_water, albedo
-  lineage:  relabel -> subset
+  history:  relabel -> subset
 ```
 
-Every transform returns a new object and appends to `meta.lineage`. Together with
-`meta.content_hash`, which identifies the bytes the data was read from, the lineage is
+Every transform returns a new object and appends to `meta.history`. Together with
+`meta.content_hash`, which identifies the bytes the data was read from, the history is
 what reproduces a result.
 
 ```julia
-julia> day.meta.lineage
+julia> day.meta.history
 2-element Vector{Symbol}:
  :relabel
  :subset
@@ -205,7 +205,7 @@ julia> ghi(masked)[12:14]
  NaN
  NaN
 
-julia> masked.meta.lineage
+julia> masked.meta.history
 1-element Vector{Symbol}:
  :qc_mask
 ```
