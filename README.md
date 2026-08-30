@@ -119,7 +119,7 @@ true
 
 ## Tables.jl interface
 
-`MeteoData` is a column-oriented `Tables.jl` source. Five methods are implemented.
+Every `MeteoData` object is a column-oriented `Tables.jl` source.
 
 | Method | Result |
 |:---|:---|
@@ -147,7 +147,8 @@ Tables.Schema:
  ⋮
 ```
 
-This means you can also use `MeteoData` with any package that supports the `Tables.jl` interface, such as `DataFrames.jl`.
+This means you can also use `MeteoData` with any package that supports the `Tables.jl`
+interface, such as `DataFrames.jl`.
 
 ```julia
 julia> using DataFrames
