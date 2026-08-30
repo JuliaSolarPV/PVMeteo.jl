@@ -82,7 +82,33 @@ julia> round(sum(ghi(md)[1:24]) / 1000, digits = 2)   # kWh/m2 on day one
 7.02
 ```
 
-Every column has an accessor, `time` included, and they return views. A missing column raises an error listing the available columns.
+Every column has an accessor, `time` included.
+
+```julia
+julia> time(md)[1]
+2020-06-20T00:00:00
+
+julia> ghi(md)[12:14]
+3-element Vector{Float64}:
+ 732.0
+ 739.0
+ 710.0
+```
+
+An accessor returns a view, so writing through it changes the stored column.
+
+```julia
+julia> typeof(ghi(md))
+SubArray{Float64, 1, Vector{Float64}, Tuple{Base.Slice{Base.OneTo{Int64}}}, true}
+
+julia> ghi(md)[13] = 0.0        # writes through
+0.0
+
+julia> md.data.ghi[13]
+0.0
+```
+
+Asking for a column the source does not carry raises an error listing what it has.
 
 ```julia
 julia> dni(ghi_only)
