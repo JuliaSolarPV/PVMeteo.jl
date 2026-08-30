@@ -65,9 +65,10 @@ Readers map each source onto a fixed set of canonical columns, always in SI unit
 
 Anything a reader cannot map to one of these is kept in `md.meta.extra`.
 
-Timestamps are held separately in `md.time`. Every `MeteoData` has one, always in
-UTC, and it is the first column of the table. `datacolumns` and `hascolumn` cover
-the canonical data columns only.
+`md.time` is the one column guaranteed to exist. It is always present, always in
+UTC, and always the first column of the table. Every canonical column above is
+optional, so `datacolumns` and `hascolumn` report only the ones a given source
+carries.
 
 ```julia
 julia> datacolumns(md)
