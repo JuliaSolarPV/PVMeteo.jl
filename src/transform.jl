@@ -35,3 +35,35 @@ function relabel(md::MeteoData, label::IntervalLabel)
     meta = with_lineage(md.meta, :relabel; label = label)
     return MeteoData(md.time .+ shift, md.data, meta)
 end
+
+"""
+    subset(md::MeteoData, t0::DateTime, t1::DateTime) -> MeteoData
+
+The records in the half-open interval `[t0, t1)`.
+
+The columns are copied, so writes to the result do not reach the source.
+`meta.content_hash` is carried over unchanged, because it identifies the bytes the
+data was parsed from. `:subset` is appended to `meta.lineage`, and that is what
+records the narrowing.
+
+A range that selects nothing throws rather than returning an empty `MeteoData`.
+The search assumes the timestamps are sorted, so run [`validate`](@ref) first if
+the source might be out of order.
+"""
+function subset(md::MeteoData, t0::DateTime, t1::DateTime)
+    t1 > t0 || throw(ArgumentError("t1 $t1 must be after t0 $t0"))
+    lo = searchsortedfirst(md.time, t0)
+    hi = searchsortedfirst(md.time, t1) - 1
+    lo <= hi || throw(
+        ArgumentError(
+            "[$t0, $t1) selects no records. " *
+            "This series runs $(first(md.time)) to $(last(md.time)).",
+        ),
+    )
+    keep = lo:hi
+    return MeteoData(
+        md.time[keep],
+        map(v -> v[keep], md.data),
+        with_lineage(md.meta, :subset),
+    )
+end
