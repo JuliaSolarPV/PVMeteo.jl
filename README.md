@@ -49,7 +49,6 @@ julia> t.meta.utc_offset, t.time[1], first(pressure(t))
 ## Columns
 
 Readers map each source onto a fixed set of canonical columns, always in SI units.
-No source carries all of them.
 
 | Column | Quantity | Unit |
 |:---|:---|:---|
@@ -65,8 +64,10 @@ No source carries all of them.
 | `:precipitable_water` | precipitable water | cm |
 
 Anything a reader cannot map to one of these is kept in `md.meta.extra`.
-Timestamps are held separately in `md.time`. It is the first column of the table,
-and `datacolumns` and `hascolumn` cover the canonical data columns only.
+
+Timestamps are held separately in `md.time`. Every `MeteoData` has one, always in
+UTC, and it is the first column of the table. `datacolumns` and `hascolumn` cover
+the canonical data columns only.
 
 ```julia
 julia> datacolumns(md)
