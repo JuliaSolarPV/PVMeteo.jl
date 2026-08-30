@@ -52,12 +52,24 @@ end
 
 The records in the half-open interval `[t0, t1)`.
 
-The columns are copied, so the result owns its values. `meta.content_hash` carries
-over, since it identifies the bytes the data was parsed from, and the result
-records that `subset` ran.
+Each column of the result is a fresh `Vector` holding the selected records.
+`meta.content_hash` carries over, since it identifies the bytes the data was
+parsed from, and the result records that `subset` ran.
 
 A range that selects nothing throws. The search assumes sorted timestamps, so run
 [`validate`](@ref) first when the source might be out of order.
+
+# Example
+
+```julia
+julia> day = subset(md, DateTime(2020, 6, 21), DateTime(2020, 6, 22));
+
+julia> length(day.time), day.time[1], day.time[end]
+(24, DateTime("2020-06-21T00:00:00"), DateTime("2020-06-21T23:00:00"))
+
+julia> day.data.ghi === md.data.ghi
+false
+```
 """
 function subset(md::MeteoData, t0::DateTime, t1::DateTime)
     t1 > t0 || throw(ArgumentError("t1 $t1 must be after t0 $t0"))
