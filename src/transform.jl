@@ -22,12 +22,23 @@ end
 
 Move the timestamps to a different interval-labelling convention.
 
-Each timestamp shifts by the difference between the two conventions. The values are
-untouched and the returned object shares them, because relabelling says where an
-interval sits, not what was measured over it. Resampling to a different interval is
-a separate operation.
+Each timestamp shifts by the offset between the two conventions. `meta.label`
+becomes `label`, and the result records that `relabel` ran.
 
-`meta.label` becomes `label`, and the result records that `relabel` ran.
+# Example
+
+An hourly EPW file is `RightLabeled`, so 12:00 covers 11:00 to 12:00. The same
+interval is 11:00 under `LeftLabeled`, carrying the same 739 W/m^2.
+
+```julia
+julia> md.meta.label, md.time[13], ghi(md)[13]
+(RightLabeled(), DateTime("2020-06-20T12:00:00"), 739.0)
+
+julia> left = relabel(md, LeftLabeled());
+
+julia> left.meta.label, left.time[13], ghi(left)[13]
+(LeftLabeled(), DateTime("2020-06-20T11:00:00"), 739.0)
+```
 """
 function relabel(md::MeteoData, label::IntervalLabel)
     interval = md.meta.interval
